@@ -9,8 +9,8 @@ class Unit {
   final String id;
   final String name;
   final List<String> userIds;
-  final List<User> users;
-  final List<Task> tasks;
+  final List<User>? users;
+  final List<Task>? tasks;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -18,8 +18,8 @@ class Unit {
     required this.id,
     required this.name,
     required this.userIds,
-    required this.users,
-    required this.tasks,
+    this.users,
+    this.tasks,
     required this.createdAt,
     required this.updatedAt,
   });

@@ -8,6 +8,8 @@ import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:photo_view/photo_view.dart';
 
 class TaskCard extends StatefulWidget {
   final Task task;
@@ -97,16 +99,7 @@ class _TaskCardState extends State<TaskCard> {
                         title: Text('Harita Gösterimi'),
                       );
                     },
-                    body: widget.task.locationX != null &&
-                            widget.task.locationY != null
-                        ? TaskMapCard(
-                            locationX: widget.task.locationX,
-                            locationY: widget.task.locationY,
-                          )
-                        : const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text("Konum bilgisi bulunmamaktadır."),
-                          ),
+                    body: buildMap(context),
                     isExpanded: _isMapExpanded,
                   ),
                   ExpansionPanel(
@@ -115,30 +108,7 @@ class _TaskCardState extends State<TaskCard> {
                         title: Text('Dosyalar'),
                       );
                     },
-                    body: widget.task.files.isNotEmpty
-                        ? Column(
-                            children: [
-                              for (var file in widget.task.files)
-                                Image.network(HttpService.getFile(file),
-                                    height: 100,
-                                    fit: BoxFit.contain, loadingBuilder: (
-                                  context,
-                                  child,
-                                  loadingProgress,
-                                ) {
-                                  if (loadingProgress == null) {
-                                    return child;
-                                  }
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }),
-                            ],
-                          )
-                        : const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text("Dosya bulunmamaktadır."),
-                          ),
+                    body: buildImages(context),
                     isExpanded: _isFilesExpanded,
                   ),
                 ],
@@ -159,6 +129,50 @@ class _TaskCardState extends State<TaskCard> {
         ),
       ),
     );
+  }
+
+  Widget buildMap(BuildContext context) {
+    return widget.task.locationX != null && widget.task.locationY != null
+        ? TaskMapCard(
+            locationX: widget.task.locationX,
+            locationY: widget.task.locationY,
+          )
+        : const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text("Konum bilgisi bulunmamaktadır."),
+          );
+  }
+
+  Widget buildImages(BuildContext context) {
+    return widget.task.files.isEmpty
+        ? const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text("Dosya bulunmamaktadır."),
+          )
+        : Column(
+            children: [
+              for (var file in widget.task.files)
+                GestureDetector(
+                  onTap: () {
+                    Get.to(() =>
+                        FullScreenImage(imageUrl: HttpService.getFile(file)));
+                  },
+                  child: Image.network(
+                    HttpService.getFile(file),
+                    height: 100,
+                    fit: BoxFit.contain,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      }
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          );
   }
 
   Widget buildButtons(BuildContext context) {
@@ -202,6 +216,26 @@ class _TaskCardState extends State<TaskCard> {
               )
             : const SizedBox.shrink(),
       ],
+    );
+  }
+}
+
+class FullScreenImage extends StatelessWidget {
+  final String imageUrl;
+
+  const FullScreenImage({super.key, required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Tam Ekran Resim'),
+      ),
+      body: Center(
+        child: PhotoView(
+          imageProvider: NetworkImage(imageUrl),
+        ),
+      ),
     );
   }
 }

@@ -64,6 +64,7 @@ Future<User> getUser(String id) async {
 
 Future<List<Unit>> getUnits() async {
   final res = await HttpService.fetcher("/units");
+  logger.d("getUnits: $res");
   List<Unit> units = (res as List).map((e) => Unit.fromJson(e)).toList();
   return units;
 }

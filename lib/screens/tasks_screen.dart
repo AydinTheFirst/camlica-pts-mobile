@@ -1,17 +1,16 @@
 import 'package:camlica_pts/components/task_card.dart';
 import 'package:camlica_pts/providers.dart';
-import 'package:camlica_pts/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fquery/fquery.dart';
+import 'package:get/get.dart';
 import '/models/enums.dart';
 
 class TasksScreen extends HookWidget {
   const TasksScreen({super.key});
 
   void onPressed() {
-    ToastService.error(message: "Bu özellik henüz eklenmedi");
-    /* Get.toNamed("/tasks/add"); */
+    Get.toNamed("/tasks/add");
   }
 
   @override

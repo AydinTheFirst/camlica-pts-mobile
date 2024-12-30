@@ -11,11 +11,11 @@ Unit _$UnitFromJson(Map<String, dynamic> json) => Unit(
       name: json['name'] as String,
       userIds:
           (json['userIds'] as List<dynamic>).map((e) => e as String).toList(),
-      users: (json['users'] as List<dynamic>)
-          .map((e) => User.fromJson(e as Map<String, dynamic>))
+      users: (json['users'] as List<dynamic>?)
+          ?.map((e) => User.fromJson(e as Map<String, dynamic>))
           .toList(),
-      tasks: (json['tasks'] as List<dynamic>)
-          .map((e) => Task.fromJson(e as Map<String, dynamic>))
+      tasks: (json['tasks'] as List<dynamic>?)
+          ?.map((e) => Task.fromJson(e as Map<String, dynamic>))
           .toList(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
