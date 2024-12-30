@@ -12,7 +12,7 @@ import 'package:logger/logger.dart';
 final Logger logger = Logger();
 
 final QueryClient queryClient = QueryClient(
-  defaultQueryOptions: DefaultQueryOptions(retryCount: 1),
+  defaultQueryOptions: DefaultQueryOptions(),
 );
 
 void main() {

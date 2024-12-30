@@ -28,7 +28,7 @@ class ProfileCard extends HookWidget {
 
   void onLogout(BuildContext context) {
     TokenStorage.deleteToken();
-    Get.toNamed("/login");
+    Get.offAllNamed("/login");
   }
 
   @override

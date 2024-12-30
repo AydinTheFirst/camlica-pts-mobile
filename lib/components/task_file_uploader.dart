@@ -64,7 +64,7 @@ class _TaskFileUploaderState extends State<TaskFileUploader> {
         ),
       );
 
-      await HttpService.dio.patch("/tasks/${widget.task.id}/files", data: {
+      await HttpService.dio.patch("/tasks/${widget.task.id}", data: {
         "files": response.data,
       });
 

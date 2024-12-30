@@ -54,10 +54,9 @@ class HttpService {
     }
 
     if (error.response!.statusCode == 401) {
-      Get.toNamed("/login");
-      return ToastService.error(
-        message: "Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.",
-      );
+      if (Get.currentRoute == "/login") return;
+      Get.offAllNamed("/login");
+      return;
     }
 
     final message = error.response!.data['message'];

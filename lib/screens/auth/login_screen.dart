@@ -39,7 +39,7 @@ class LoginScreenState extends State<LoginScreen> {
       TokenStorage.saveToken(res.data['token']);
       ToastService.success(message: "Giriş başarılı");
 
-      Get.toNamed("/profile");
+      Get.offAllNamed("/");
     } on DioException catch (e) {
       HttpService.handleError(
         e,
