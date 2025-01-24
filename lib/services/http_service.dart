@@ -1,5 +1,6 @@
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '/main.dart';
 import 'token_storage.dart';
@@ -9,7 +10,7 @@ const urlMapping = {
   "production": "https://camlica-pts.riteknoloji.com/api",
 };
 
-String apiUrl = urlMapping["development"]!;
+String apiUrl = urlMapping[kReleaseMode ? "production" : "development"]!;
 
 class HttpService {
   static final Dio dio = Dio(BaseOptions(
