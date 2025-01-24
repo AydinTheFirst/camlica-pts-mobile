@@ -7,6 +7,7 @@ import 'package:camlica_pts/models/user_model.dart';
 import 'package:camlica_pts/providers.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/services/toast_service.dart';
+import 'package:camlica_pts/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -176,7 +177,7 @@ class TaskAddFormBody extends HookWidget {
               items: TaskStatus.values
                   .map((status) => DropdownMenuItem(
                         value: status,
-                        child: Text(status.name),
+                        child: Text(translateTaskStatus(status)),
                       ))
                   .toList(),
               onChanged: (value) => status.value = value!,

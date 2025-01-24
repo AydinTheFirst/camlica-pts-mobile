@@ -26,14 +26,14 @@ Future<Post> getPost(String id) async {
 }
 
 Future<List<TimeLog>> getTimeLogs() async {
-  final res = await HttpService.fetcher('/attendances');
+  final res = await HttpService.fetcher('/timelogs');
   List<TimeLog> timeLogs =
       (res as List).map((e) => TimeLog.fromJson(e)).toList();
   return timeLogs;
 }
 
 Future<TimeLog> getTimeLog(String id) async {
-  final res = await HttpService.fetcher('/attendances/$id');
+  final res = await HttpService.fetcher('/timelogs/$id');
   TimeLog timeLog = TimeLog.fromJson(res as Map<String, dynamic>);
   return timeLog;
 }

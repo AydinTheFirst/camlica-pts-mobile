@@ -84,7 +84,7 @@ class _BarcodeScannerSimpleState extends State<QrScreen> {
       final token = json['token'];
 
       try {
-        await HttpService.fetcher("/attendances/scan/$token");
+        await HttpService.dio.get("/qrcode/scan/$token");
         setState(() {
           _scanResult = ScanResult.fromJson(
             {"success": true, "type": type, "token": token},

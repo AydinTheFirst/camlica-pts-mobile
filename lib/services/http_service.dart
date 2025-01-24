@@ -9,7 +9,7 @@ const urlMapping = {
   "production": "https://camlica-pts.riteknoloji.com/api",
 };
 
-String apiUrl = urlMapping["production"]!;
+String apiUrl = urlMapping["development"]!;
 
 class HttpService {
   static final Dio dio = Dio(BaseOptions(

@@ -13,6 +13,7 @@ class StyledButton extends StatelessWidget {
     this.shape = Shapes.rounded,
     this.isDisabled = false,
     this.isLoading = false,
+    this.fullWidth = false,
   });
 
   final void Function() onPressed;
@@ -22,9 +23,10 @@ class StyledButton extends StatelessWidget {
 
   final bool isDisabled;
   final bool isLoading;
+  final bool fullWidth;
 
   final Map<Variants, Color> colors = {
-    Variants.primary: Colors.blue,
+    Variants.primary: Colors.blueAccent,
     Variants.secondary: Colors.grey,
     Variants.success: Colors.green,
     Variants.danger: Colors.red,
@@ -50,15 +52,33 @@ class StyledButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: isDisabled || isLoading ? null : onPressed,
+      onPressed: isDisabled
+          ? null
+          : () {
+              if (isLoading) return;
+              onPressed();
+            },
       style: ElevatedButton.styleFrom(
         backgroundColor: isDisabled ? Colors.grey : colors[variant],
         foregroundColor: isDisabled ? Colors.black : textColor[variant],
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadius[shape]!),
         ),
+        minimumSize: Size(fullWidth ? double.infinity : 120, 40),
+        maximumSize: Size(double.infinity, 40),
       ),
-      child: child,
+      child: isLoading
+          ? Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                ),
+              ),
+            )
+          : child,
     );
   }
 }

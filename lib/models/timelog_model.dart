@@ -1,5 +1,3 @@
-import 'package:camlica_pts/models/enums.dart';
-
 import '/models/user_model.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -12,7 +10,6 @@ class TimeLog {
   final DateTime? checkOut;
   final String userId;
   final User? user;
-  final AttendanceStatus status;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -22,7 +19,6 @@ class TimeLog {
     this.checkOut,
     required this.userId,
     this.user,
-    required this.status,
     required this.createdAt,
     required this.updatedAt,
   });

@@ -1,10 +1,10 @@
 import 'package:camlica_pts/components/styled_button.dart';
+import 'package:camlica_pts/screens/auth/twofa_login_screen.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '/services/token_storage.dart';
 import '/services/http_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -16,7 +16,7 @@ class LoginScreen extends StatefulWidget {
 
 class LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
 
@@ -28,18 +28,20 @@ class LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final res = await HttpService.dio.post(
+      await HttpService.dio.post(
         '/auth/login',
         data: {
-          'username': _emailController.text,
+          'username': _usernameController.text,
           'password': _passwordController.text,
         },
       );
 
-      TokenStorage.saveToken(res.data['token']);
-      ToastService.success(message: "Giriş başarılı");
+      ToastService.success(message: "Doğrulama kodu gönderildi!");
 
-      Get.offAllNamed("/");
+      Get.to(TwoFactorLoginScreen(
+        username: _usernameController.text,
+        password: _passwordController.text,
+      ));
     } on DioException catch (e) {
       HttpService.handleError(
         e,
@@ -66,16 +68,23 @@ class LoginScreenState extends State<LoginScreen> {
           key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 10,
             children: [
               TextFormField(
-                controller: _emailController,
+                controller: _usernameController,
                 decoration: const InputDecoration(
                   labelText: 'Kullanıcı Adı',
                   prefixIcon: Icon(Icons.person),
                   border: OutlineInputBorder(),
                 ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Lütfen kullanıcı adınızı girin";
+                  }
+
+                  return null;
+                },
               ),
-              const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
@@ -107,13 +116,11 @@ class LoginScreenState extends State<LoginScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : StyledButton(
-                      onPressed: _login,
-                      child: const Text('Giriş Yap'),
-                    ),
+              StyledButton(
+                isLoading: _isLoading,
+                onPressed: _login,
+                child: const Text('Giriş Yap'),
+              ),
             ],
           ),
         ),

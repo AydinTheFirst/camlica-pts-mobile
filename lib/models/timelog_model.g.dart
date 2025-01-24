@@ -16,7 +16,6 @@ TimeLog _$TimeLogFromJson(Map<String, dynamic> json) => TimeLog(
       user: json['user'] == null
           ? null
           : User.fromJson(json['user'] as Map<String, dynamic>),
-      status: $enumDecode(_$AttendanceStatusEnumMap, json['status']),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -27,14 +26,6 @@ Map<String, dynamic> _$TimeLogToJson(TimeLog instance) => <String, dynamic>{
       'checkOut': instance.checkOut?.toIso8601String(),
       'userId': instance.userId,
       'user': instance.user,
-      'status': _$AttendanceStatusEnumMap[instance.status]!,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
     };
-
-const _$AttendanceStatusEnumMap = {
-  AttendanceStatus.PRESENT: 'PRESENT',
-  AttendanceStatus.ABSENT: 'ABSENT',
-  AttendanceStatus.LATE: 'LATE',
-  AttendanceStatus.ON_LEAVE: 'ON_LEAVE',
-};

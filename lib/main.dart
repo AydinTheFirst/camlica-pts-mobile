@@ -1,5 +1,4 @@
 import 'package:camlica_pts/screens/auth/forgot_password_screen.dart';
-import 'package:camlica_pts/screens/logs_screen.dart';
 import 'package:camlica_pts/screens/not_found.dart';
 import 'package:camlica_pts/screens/task_add_screen.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +37,7 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: "/", page: () => BottomNavigation()),
         GetPage(name: "/profile", page: () => BottomNavigation()),
-        GetPage(name: "/logs", page: () => LogsScreen()),
+        GetPage(name: "/logs", page: () => BottomNavigation()),
         GetPage(name: "/qr", page: () => BottomNavigation()),
         GetPage(name: "/tasks", page: () => BottomNavigation()),
         GetPage(name: "/tasks/add", page: () => TaskAddScreen()),

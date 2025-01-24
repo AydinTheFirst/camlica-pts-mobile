@@ -23,5 +23,6 @@ String formatDate(DateTime date) {
 
 String formatTime(DateTime date) {
   initializeDateFormatting('tr_TR', null);
-  return DateFormat('HH:mm', 'tr_TR').format(date);
+  final gmtPlus3 = date.toUtc().add(Duration(hours: 3));
+  return DateFormat('HH:mm', 'tr_TR').format(gmtPlus3);
 }
