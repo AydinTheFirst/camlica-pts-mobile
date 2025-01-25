@@ -21,9 +21,6 @@ class TwoFactorLoginScreen extends StatefulWidget {
 }
 
 class _TwoFactorLoginScreenState extends State<TwoFactorLoginScreen> {
-  String username = "";
-  String password = "";
-
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _codeController = TextEditingController();
   bool _isLoading = false;
@@ -39,8 +36,8 @@ class _TwoFactorLoginScreenState extends State<TwoFactorLoginScreen> {
       final res = await HttpService.dio.post(
         '/auth/login/2fa',
         data: {
-          'username': username,
-          'password': password,
+          'username': widget.username,
+          'password': widget.password,
           "code": _codeController.text,
         },
       );
@@ -57,6 +54,24 @@ class _TwoFactorLoginScreenState extends State<TwoFactorLoginScreen> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  void handleResend() async {
+    try {
+      await HttpService.dio.post(
+        '/auth/login',
+        data: {
+          'username': widget.username,
+          'password': widget.password,
+        },
+      );
+
+      ToastService.success(message: "Doğrulama kodu gönderildi!");
+    } on DioException catch (e) {
+      HttpService.handleError(
+        e,
+      );
     }
   }
 
@@ -93,7 +108,18 @@ class _TwoFactorLoginScreenState extends State<TwoFactorLoginScreen> {
                   return null;
                 },
               ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: handleResend,
+                    child: const Text('Tekrar Gönder'),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
               StyledButton(
+                fullWidth: true,
                 isLoading: _isLoading,
                 onPressed: handleSubmit,
                 child: const Text('Giriş Yap'),
@@ -103,12 +129,5 @@ class _TwoFactorLoginScreenState extends State<TwoFactorLoginScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    username = widget.username;
-    password = widget.password;
   }
 }

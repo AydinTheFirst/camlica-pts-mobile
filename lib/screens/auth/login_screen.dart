@@ -119,6 +119,7 @@ class LoginScreenState extends State<LoginScreen> {
               StyledButton(
                 isLoading: _isLoading,
                 onPressed: _login,
+                fullWidth: true,
                 child: const Text('Giriş Yap'),
               ),
             ],
