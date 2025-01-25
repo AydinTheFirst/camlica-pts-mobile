@@ -136,6 +136,7 @@ class _TaskCardState extends State<TaskCard> {
         ? TaskMapCard(
             locationX: widget.task.locationX,
             locationY: widget.task.locationY,
+            task: widget.task,
           )
         : const Padding(
             padding: EdgeInsets.all(16.0),

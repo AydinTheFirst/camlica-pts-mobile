@@ -63,10 +63,10 @@ class HttpService {
     final message = error.response!.data['message'];
     final errors = error.response!.data['errors'];
 
-    final errorList = errors != null
-        ? errors.values.toList().join("\n")
-        : "Lütfen tekrar deneyin.";
+    logger.e("Error: $errors");
 
+    final errorList =
+        errors != null ? errors.join("\n") : "Lütfen tekrar deneyin.";
     ToastService.error(title: message, message: errorList);
   }
 

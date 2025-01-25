@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:camlica_pts/components/map_click_tracker.dart';
 import 'package:camlica_pts/components/styled_button.dart';
 import 'package:camlica_pts/main.dart';
@@ -108,7 +110,7 @@ class TaskAddFormBody extends HookWidget {
           "status": status.value.name,
           "locationX": locationX.value,
           "locationY": locationY.value,
-          "selectedMap": selectedMap.value.url,
+          "selectedMap": jsonEncode(selectedMap.value.toJson()),
         });
         logger.i("Task added");
         ToastService.success(message: "Görev eklendi");

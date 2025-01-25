@@ -1,10 +1,18 @@
+import 'package:camlica_pts/models/task_model.dart';
+import 'package:camlica_pts/services/http_service.dart';
 import 'package:flutter/material.dart';
 
 class TaskMapCard extends StatelessWidget {
   final double? locationX;
   final double? locationY;
+  final Task task;
 
-  const TaskMapCard({super.key, this.locationX, this.locationY});
+  const TaskMapCard({
+    super.key,
+    this.locationX,
+    this.locationY,
+    required this.task,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +32,8 @@ class TaskMapCard extends StatelessWidget {
                   height: mapHeight,
                   child: Stack(
                     children: [
-                      Image.asset(
-                        'assets/map.jpeg',
+                      Image.network(
+                        HttpService.getFile(task.selectedMap.url),
                         width: mapWidth,
                         height: mapHeight,
                         fit: BoxFit.cover,
