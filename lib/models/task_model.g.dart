@@ -6,6 +6,16 @@ part of 'task_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+TaskMap _$TaskMapFromJson(Map<String, dynamic> json) => TaskMap(
+      url: json['url'] as String,
+      title: json['title'] as String,
+    );
+
+Map<String, dynamic> _$TaskMapToJson(TaskMap instance) => <String, dynamic>{
+      'url': instance.url,
+      'title': instance.title,
+    };
+
 Task _$TaskFromJson(Map<String, dynamic> json) => Task(
       id: json['id'] as String,
       title: json['title'] as String,
@@ -29,6 +39,8 @@ Task _$TaskFromJson(Map<String, dynamic> json) => Task(
       locationX: (json['locationX'] as num?)?.toDouble(),
       locationY: (json['locationY'] as num?)?.toDouble(),
       location: json['location'] as String?,
+      selectedMap:
+          TaskMap.fromJson(json['selectedMap'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$TaskToJson(Task instance) => <String, dynamic>{
@@ -46,6 +58,7 @@ Map<String, dynamic> _$TaskToJson(Task instance) => <String, dynamic>{
       'locationX': instance.locationX,
       'locationY': instance.locationY,
       'location': instance.location,
+      'selectedMap': instance.selectedMap,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
     };

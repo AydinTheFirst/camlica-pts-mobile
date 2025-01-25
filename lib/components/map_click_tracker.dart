@@ -1,3 +1,5 @@
+import 'package:camlica_pts/models/task_model.dart';
+import 'package:camlica_pts/services/http_service.dart';
 import 'package:flutter/material.dart';
 
 class MapClickTracker extends StatefulWidget {
@@ -5,7 +7,13 @@ class MapClickTracker extends StatefulWidget {
     required Map<String, double> position,
   }) onPositionSelected;
 
-  const MapClickTracker({super.key, required this.onPositionSelected});
+  final TaskMap selectedMap;
+
+  const MapClickTracker({
+    super.key,
+    required this.onPositionSelected,
+    required this.selectedMap,
+  });
 
   @override
   createState() => _MapClickTrackerState();
@@ -39,8 +47,8 @@ class _MapClickTrackerState extends State<MapClickTracker> {
       children: [
         GestureDetector(
           onTapDown: (details) => _handleTap(context, details),
-          child: Image.asset(
-            'assets/map.jpeg', // Harita resminizin yolu
+          child: Image.network(
+            HttpService.getFile(widget.selectedMap.url),
             fit: BoxFit.contain,
           ),
         ),

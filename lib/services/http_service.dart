@@ -34,7 +34,7 @@ class HttpService {
         },
         onError: (error, handler) {
           // Hata durumunda
-          logger.e("Error: ${error.message}");
+          logger.e("Error: $error");
           if (error.response != null) {
             logger.w(
                 "Error Response: [${error.response?.statusCode}] => PATH: ${error.requestOptions.path}");

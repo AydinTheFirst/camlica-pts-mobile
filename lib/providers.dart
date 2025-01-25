@@ -1,4 +1,5 @@
 import 'package:camlica_pts/main.dart';
+import 'package:camlica_pts/models/app_config_model.dart';
 import 'package:camlica_pts/models/post_model.dart';
 import 'package:camlica_pts/models/task_model.dart';
 import 'package:camlica_pts/models/timelog_model.dart';
@@ -73,4 +74,10 @@ Future<Unit> getUnit(String id) async {
   final res = await HttpService.fetcher("/units/$id");
   Unit unit = Unit.fromJson(res as Map<String, dynamic>);
   return unit;
+}
+
+Future<AppConfig> getAppConfig() async {
+  final res = await HttpService.fetcher("/config");
+  AppConfig appConfig = AppConfig.fromJson(res as Map<String, dynamic>);
+  return appConfig;
 }

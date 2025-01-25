@@ -52,7 +52,7 @@ class _TasksTabState extends State<TasksTab>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -68,6 +68,7 @@ class _TasksTabState extends State<TasksTab>
       TaskStatus.IN_PROGRESS: "Devam Eden",
       TaskStatus.DONE: "Tamamlanan",
       TaskStatus.APPROVED: "Onaylanan",
+      TaskStatus.REJECTED: "Reddedilen",
     };
 
     return Column(

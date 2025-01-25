@@ -2,7 +2,7 @@
 
 enum UserRole { USER, STAFF, MANAGER, ADMIN }
 
-enum TaskStatus { PENDING, IN_PROGRESS, DONE, APPROVED }
+enum TaskStatus { PENDING, IN_PROGRESS, DONE, APPROVED, REJECTED }
 
 enum LogLevel { INFO, WARN, ERROR, DEBUG }
 

@@ -1,7 +1,9 @@
 import 'package:camlica_pts/components/map_click_tracker.dart';
 import 'package:camlica_pts/components/styled_button.dart';
 import 'package:camlica_pts/main.dart';
+import 'package:camlica_pts/models/app_config_model.dart';
 import 'package:camlica_pts/models/enums.dart';
+import 'package:camlica_pts/models/task_model.dart';
 import 'package:camlica_pts/models/unit_model.dart';
 import 'package:camlica_pts/models/user_model.dart';
 import 'package:camlica_pts/providers.dart';
@@ -37,16 +39,19 @@ class TaskAddForm extends HookWidget {
   Widget build(BuildContext context) {
     final units = useQuery(["units"], getUnits);
     final users = useQuery(["users"], getUsers);
+    final config = useQuery(["config"], getAppConfig);
 
-    if (users.isLoading || units.isLoading) {
+    if (users.isLoading || units.isLoading || config.isLoading) {
       return Center(child: CircularProgressIndicator());
     }
 
-    if (users.isError || units.isError) {
+    if (users.isError || units.isError || config.isError) {
       logger.e("users.error: ${users.error}");
       logger.e("units.error: ${units.error}");
+      logger.e("config.error: ${config.error}");
       return Center(
-        child: Text("Bir hata oluştu:  ${users.error ?? units.error}"),
+        child: Text(
+            "Bir hata oluştu:  ${users.error ?? units.error ?? config.error}"),
       );
     }
 
@@ -58,54 +63,29 @@ class TaskAddForm extends HookWidget {
       return Center(child: Text("Birimler bulunamadı"));
     }
 
-    return TaskAddFormBody(users: users.data!, units: units.data!);
+    if (config.data == null) {
+      return Center(child: Text("Ayarlar bulunamadı"));
+    }
+
+    return TaskAddFormBody(
+      users: users.data!,
+      units: units.data!,
+      config: config.data!,
+    );
   }
 }
 
 class TaskAddFormBody extends HookWidget {
   final List<User> users;
   final List<Unit> units;
+  final AppConfig config;
 
   const TaskAddFormBody({
     super.key,
     required this.users,
     required this.units,
+    required this.config,
   });
-
-  void onAddTask({
-    required String unitId,
-    required String title,
-    required String description,
-    required TaskStatus status,
-    required double locationX,
-    required double locationY,
-  }) async {
-    if (unitId.isEmpty ||
-        title.isEmpty ||
-        description.isEmpty ||
-        locationX == 0.0 ||
-        locationY == 0.0) {
-      ToastService.error(message: "Lütfen tüm alanları doldurun");
-      return;
-    }
-
-    try {
-      await HttpService.dio.post("/tasks", data: {
-        "unitId": unitId,
-        "title": title,
-        "description": description,
-        "status": status.index,
-        "locationX": locationX,
-        "locationY": locationY,
-      });
-      logger.i("Task added");
-      ToastService.success(message: "Görev eklendi");
-      queryClient.invalidateQueries(["tasks"]);
-      Get.toNamed("/tasks");
-    } on DioException catch (e) {
-      HttpService.handleError(e);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,8 +93,34 @@ class TaskAddFormBody extends HookWidget {
     final title = useState("");
     final description = useState("");
     final status = useState<TaskStatus>(TaskStatus.PENDING);
+    final selectedMap = useState<TaskMap>(
+      config.maps.isEmpty ? TaskMap(url: "", title: "") : config.maps.first,
+    );
     final locationX = useState(0.0);
     final locationY = useState(0.0);
+
+    void handleSubmit() async {
+      try {
+        await HttpService.dio.post("/tasks", data: {
+          "unitId": unitId.value,
+          "title": title.value,
+          "description": description.value,
+          "status": status.value.name,
+          "locationX": locationX.value,
+          "locationY": locationY.value,
+          "selectedMap": selectedMap.value.url,
+        });
+        logger.i("Task added");
+        ToastService.success(message: "Görev eklendi");
+        queryClient.invalidateQueries(["tasks"]);
+        Get.toNamed("/tasks");
+      } on DioException catch (e) {
+        HttpService.handleError(e);
+      } catch (e) {
+        logger.e("Error adding task: $e");
+        ToastService.error(message: "Görev eklenirken bir hata oluştu");
+      }
+    }
 
     return SingleChildScrollView(
       child: Padding(
@@ -122,29 +128,10 @@ class TaskAddFormBody extends HookWidget {
         child: Column(
           spacing: 10,
           children: [
-            Text("Görev Ekle",
-                style: Theme.of(context).textTheme.headlineMedium),
-            /*         DropdownButtonFormField<User>(
-              items: users
-                  .map((user) => DropdownMenuItem(
-                        value: user,
-                        child: Text("${user.firstName} ${user.lastName}"),
-                      ))
-                  .toList(),
-              onChanged: (value) => assignedById.value = value!.id,
-              decoration: InputDecoration(labelText: "Atayan Kullanıcı"),
+            Text(
+              "Görev Ekle",
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
-            DropdownButtonFormField<User>(
-              items: users
-                  .map((user) => DropdownMenuItem(
-                        value: user,
-                        child: Text("${user.firstName} ${user.lastName}"),
-                      ))
-                  .toList(),
-              onChanged: (value) => assignedToId.value = value!.id,
-              decoration: InputDecoration(labelText: "Kullanıcı"),
-            ), */
-
             DropdownButtonFormField<Unit>(
               items: units
                   .map((unit) => DropdownMenuItem(
@@ -184,7 +171,20 @@ class TaskAddFormBody extends HookWidget {
               value: TaskStatus.PENDING,
               decoration: InputDecoration(labelText: "Durum"),
             ),
+            DropdownButtonFormField(
+              items: config.maps
+                  .map((map) => DropdownMenuItem(
+                        value: map.url,
+                        child: Text(map.title),
+                      ))
+                  .toList(),
+              onChanged: (value) => selectedMap.value =
+                  config.maps.firstWhere((map) => map.url == value),
+              value: selectedMap.value.url,
+              decoration: InputDecoration(labelText: "Seçili Harita"),
+            ),
             MapClickTracker(
+              selectedMap: selectedMap.value,
               onPositionSelected: ({required Map<String, double> position}) {
                 locationX.value = position['x']!;
                 locationY.value = position['y']!;
@@ -192,16 +192,8 @@ class TaskAddFormBody extends HookWidget {
             ),
             SizedBox(height: 20),
             StyledButton(
-              onPressed: () {
-                onAddTask(
-                  unitId: unitId.value,
-                  title: title.value,
-                  description: description.value,
-                  status: status.value,
-                  locationX: locationX.value,
-                  locationY: locationY.value,
-                );
-              },
+              onPressed: handleSubmit,
+              fullWidth: true,
               child: Text("Görevi Ekle"),
             ),
           ],

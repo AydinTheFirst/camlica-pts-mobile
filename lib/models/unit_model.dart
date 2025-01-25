@@ -8,7 +8,6 @@ part 'unit_model.g.dart';
 class Unit {
   final String id;
   final String name;
-  final List<String> userIds;
   final List<User>? users;
   final List<Task>? tasks;
   final DateTime createdAt;
@@ -17,7 +16,6 @@ class Unit {
   Unit({
     required this.id,
     required this.name,
-    required this.userIds,
     this.users,
     this.tasks,
     required this.createdAt,

@@ -1,29 +1,25 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'unit_model.dart';
+part of 'app_config_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-Unit _$UnitFromJson(Map<String, dynamic> json) => Unit(
+AppConfig _$AppConfigFromJson(Map<String, dynamic> json) => AppConfig(
       id: json['id'] as String,
-      name: json['name'] as String,
-      users: (json['users'] as List<dynamic>?)
-          ?.map((e) => User.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      tasks: (json['tasks'] as List<dynamic>?)
-          ?.map((e) => Task.fromJson(e as Map<String, dynamic>))
+      title: json['title'] as String,
+      maps: (json['maps'] as List<dynamic>)
+          .map((e) => TaskMap.fromJson(e as Map<String, dynamic>))
           .toList(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
 
-Map<String, dynamic> _$UnitToJson(Unit instance) => <String, dynamic>{
+Map<String, dynamic> _$AppConfigToJson(AppConfig instance) => <String, dynamic>{
       'id': instance.id,
-      'name': instance.name,
-      'users': instance.users,
-      'tasks': instance.tasks,
+      'title': instance.title,
+      'maps': instance.maps,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
     };

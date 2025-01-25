@@ -1,11 +1,11 @@
+import 'package:camlica_pts/bottom_navigation.dart';
 import 'package:camlica_pts/screens/auth/forgot_password_screen.dart';
+import 'package:camlica_pts/screens/auth/login_screen.dart';
 import 'package:camlica_pts/screens/not_found.dart';
 import 'package:camlica_pts/screens/task_add_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fquery/fquery.dart';
 import 'package:get/get.dart';
-import '/bottom_navigation.dart';
-import '/screens/auth/login_screen.dart';
 import 'package:logger/logger.dart';
 
 final Logger logger = Logger();

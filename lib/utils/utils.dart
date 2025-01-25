@@ -13,6 +13,8 @@ String translateTaskStatus(TaskStatus status) {
       return "Devam Ediyor";
     case TaskStatus.PENDING:
       return "Beklemede";
+    case TaskStatus.REJECTED:
+      return "Reddedildi";
   }
 }
 
