@@ -10,6 +10,9 @@ class TimeLog {
   final DateTime? checkOut;
   final String userId;
   final User? user;
+  double total = 0;
+  bool isEarlyOut = false;
+  bool isLateIn = false;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -19,6 +22,9 @@ class TimeLog {
     this.checkOut,
     required this.userId,
     this.user,
+    this.total = 0,
+    this.isEarlyOut = false,
+    this.isLateIn = false,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -27,3 +33,20 @@ class TimeLog {
       _$TimeLogFromJson(json);
   Map<String, dynamic> toJson() => _$TimeLogToJson(this);
 }
+/** model TimeLog {
+  id       String    @id @default(uuid())
+  checkIn  DateTime
+  checkOut DateTime?
+  total    Float     @default(0)
+
+  isEarlyOut Boolean @default(false)
+  isLateIn   Boolean @default(false)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("timelogs")
+} */

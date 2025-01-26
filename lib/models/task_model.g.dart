@@ -68,4 +68,5 @@ const _$TaskStatusEnumMap = {
   TaskStatus.IN_PROGRESS: 'IN_PROGRESS',
   TaskStatus.DONE: 'DONE',
   TaskStatus.APPROVED: 'APPROVED',
+  TaskStatus.REJECTED: 'REJECTED',
 };

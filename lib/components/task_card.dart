@@ -124,6 +124,9 @@ class _TaskCardState extends State<TaskCard> {
                 ],
               ),
               buildButtons(context),
+              widget.task.status == TaskStatus.IN_PROGRESS
+                  ? TaskFileUploader(task: widget.task)
+                  : const SizedBox.shrink(),
             ],
           ),
         ),
@@ -150,29 +153,36 @@ class _TaskCardState extends State<TaskCard> {
             padding: EdgeInsets.all(16.0),
             child: Text("Dosya bulunmamaktadır."),
           )
-        : Column(
-            children: [
-              for (var file in widget.task.files)
-                GestureDetector(
-                  onTap: () {
-                    Get.to(() =>
-                        FullScreenImage(imageUrl: HttpService.getFile(file)));
-                  },
-                  child: Image.network(
-                    HttpService.getFile(file),
-                    height: 100,
-                    fit: BoxFit.contain,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) {
-                        return child;
-                      }
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    },
-                  ),
-                ),
-            ],
+        : Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                spacing: 10,
+                children: [
+                  for (var file in widget.task.files)
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(() => FullScreenImage(
+                            imageUrl: HttpService.getFile(file)));
+                      },
+                      child: Image.network(
+                        HttpService.getFile(file),
+                        height: 100,
+                        fit: BoxFit.contain,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child;
+                          }
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
           );
   }
 
@@ -180,7 +190,8 @@ class _TaskCardState extends State<TaskCard> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        widget.task.status == TaskStatus.PENDING
+        widget.task.status == TaskStatus.PENDING ||
+                widget.task.status == TaskStatus.REJECTED
             ? StyledButton(
                 onPressed: () => onPressed(
                   TaskStatus.IN_PROGRESS,
@@ -191,19 +202,13 @@ class _TaskCardState extends State<TaskCard> {
               )
             : const SizedBox.shrink(),
         widget.task.status == TaskStatus.IN_PROGRESS
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  StyledButton(
-                    onPressed: () => onPressed(
-                      TaskStatus.DONE,
-                      context,
-                    ),
-                    variant: Variants.success,
-                    child: Text("Tamamla"),
-                  ),
-                  TaskFileUploader(task: widget.task),
-                ],
+            ? StyledButton(
+                onPressed: () => onPressed(
+                  TaskStatus.DONE,
+                  context,
+                ),
+                variant: Variants.success,
+                child: Text("Tamamla"),
               )
             : const SizedBox.shrink(),
         widget.task.status == TaskStatus.DONE

@@ -36,7 +36,7 @@ class TaskMapCard extends StatelessWidget {
                         HttpService.getFile(task.selectedMap.url),
                         width: mapWidth,
                         height: mapHeight,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.contain,
                       ),
                       if (locationX != null && locationY != null)
                         Positioned(

@@ -15,6 +15,8 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-`flutter pub run build_runner build`
+- Build Models
+  `dart run build_runner build`
 
-`flutter pub run flutter_launcher_icons:main`
+- Build Icons
+  `dart run flutter_launcher_icons:main`

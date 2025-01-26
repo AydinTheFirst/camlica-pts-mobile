@@ -25,13 +25,15 @@ class LogsTable extends HookWidget {
   const LogsTable({super.key});
 
   String calculateTotal(TimeLog log) {
-    if (log.checkOut == null) {
+    // log.total returns as ms convert it to hours and minutes
+    if (log.total == 0) {
       return "-";
     }
 
-    final diff = log.checkOut!.difference(log.checkIn);
+    final diff = Duration(milliseconds: log.total.toInt());
     final hours = diff.inHours;
     final minutes = diff.inMinutes.remainder(60);
+
     return "$hours saat $minutes dakika";
   }
 
@@ -84,11 +86,23 @@ class LogsTable extends HookWidget {
               for (final log in logsData)
                 DataRow(
                   cells: [
-                    DataCell(Text(formatDate(log.checkIn))),
-                    DataCell(Text(formatTime(log.checkIn))),
-                    DataCell(Text(log.checkOut != null
-                        ? formatTime(log.checkOut!)
-                        : "-")),
+                    DataCell(Text(formatDate(log.createdAt))),
+                    DataCell(
+                      Text(
+                        formatTime(log.checkIn),
+                        style: TextStyle(
+                          color: log.isLateIn ? Colors.red : Colors.black,
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        log.checkOut != null ? formatTime(log.checkOut!) : "-",
+                        style: TextStyle(
+                          color: log.isEarlyOut ? Colors.red : Colors.black,
+                        ),
+                      ),
+                    ),
                     DataCell(Text(calculateTotal(log))),
                   ],
                 ),

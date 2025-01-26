@@ -1,11 +1,13 @@
+import 'dart:io';
+
 import 'package:camlica_pts/components/styled_button.dart';
-import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/models/task_model.dart';
 import 'package:camlica_pts/services/http_service.dart';
-import 'package:camlica_pts/services/toast_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:camlica_pts/services/toast_service.dart';
+import 'package:camlica_pts/main.dart';
 
 class TaskFileUploader extends StatefulWidget {
   final Task task;
@@ -32,7 +34,22 @@ class _TaskFileUploaderState extends State<TaskFileUploader> {
     logger.f('Picked images: $pickedImages');
 
     setState(() {
-      files = pickedImages;
+      files.addAll(pickedImages);
+    });
+  }
+
+  Future<void> _openCamera() async {
+    final XFile? pickedImage =
+        await _picker.pickImage(source: ImageSource.camera);
+
+    if (pickedImage == null) {
+      return ToastService.error(message: "Lütfen bir resim çekin");
+    }
+
+    logger.f('Picked image: $pickedImage');
+
+    setState(() {
+      files.add(pickedImage);
     });
   }
 
@@ -83,37 +100,95 @@ class _TaskFileUploaderState extends State<TaskFileUploader> {
     }
   }
 
+  Future<void> _openBottomSheet() async {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.image),
+                title: Text("Galeriden Seç"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _openImagePicker();
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text("Kamerayı Aç"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _openCamera();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildImages(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: files.isEmpty
+            ? [Text("Dosya Bulunamadı")]
+            : files
+                .map(
+                  (file) => Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.file(
+                        File(file.path),
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      spacing: 8,
+      spacing: 10,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          spacing: 10,
-          children: [
-            StyledButton(
-              onPressed: _openImagePicker,
-              variant: Variants.secondary,
-              child: Text('Resim Seç'),
-            ),
-            StyledButton(
-              onPressed: _uploadImage,
-              variant: Variants.success,
-              isDisabled: files.isEmpty,
-              child: Text(
-                _isLoading ? "Yükleniyor..." : 'Resmi Yükle',
-              ),
-            ),
-          ],
-        ),
-        if (files.isNotEmpty)
-          Column(
-            spacing: 3,
-            children: [
-              for (var file in files) Text(file.path.split('/').last),
-            ],
+        Text(
+          "Fotoğraflar (${files.length})",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
+        ),
+        _buildImages(context),
+        StyledButton(
+          variant: Variants.secondary,
+          fullWidth: true,
+          onPressed: _openBottomSheet,
+          child: Text("Fotoğraf Ekle"),
+        ),
+        StyledButton(
+          fullWidth: true,
+          isDisabled: files.isEmpty,
+          isLoading: _isLoading,
+          onPressed: _uploadImage,
+          child: Text("Dosya Yükle"),
+        ),
       ],
     );
   }

@@ -39,22 +39,7 @@ class _BarcodeScannerSimpleState extends State<QrScreen> {
   final MobileScannerController _controller = MobileScannerController();
   Barcode? _barcode;
   ScanResult? _scanResult;
-
-  Widget _buildBarcode(Barcode? value) {
-    if (value == null) {
-      return const Text(
-        'QR Kodunu Okut!',
-        overflow: TextOverflow.fade,
-        style: TextStyle(color: Colors.white),
-      );
-    }
-
-    return Text(
-      value.displayValue ?? 'No display value.',
-      overflow: TextOverflow.fade,
-      style: const TextStyle(color: Colors.white),
-    );
-  }
+  bool _isScanning = false;
 
   void _handleBarcode(BarcodeCapture barcodes) {
     if (!mounted) return;
@@ -79,6 +64,9 @@ class _BarcodeScannerSimpleState extends State<QrScreen> {
     if (value == null) return;
 
     void sendRequest() async {
+      setState(() {
+        _isScanning = true;
+      });
       final json = jsonDecode(value);
       final type = json['type'];
       final token = json['token'];
@@ -99,6 +87,10 @@ class _BarcodeScannerSimpleState extends State<QrScreen> {
           );
         });
       }
+
+      setState(() {
+        _isScanning = false;
+      });
     }
 
     if (value.startsWith("{") &&
@@ -122,7 +114,6 @@ class _BarcodeScannerSimpleState extends State<QrScreen> {
             fontSize: 24,
           ),
         ),
-        Text("Token: ${_scanResult!.token}"),
         _scanResult!.success
             ? ElevatedButton(
                 onPressed: () {
@@ -161,27 +152,15 @@ class _BarcodeScannerSimpleState extends State<QrScreen> {
       backgroundColor: _scanResult == null ? Colors.black : Colors.white,
       body: Stack(
         children: [
-          if (_scanResult == null)
+          if (_isScanning)
+            Center(child: CircularProgressIndicator())
+          else if (_scanResult == null)
             MobileScanner(
               controller: _controller,
               onDetect: _handleBarcode,
             )
           else
             Center(child: _buildResult(context)),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              alignment: Alignment.bottomCenter,
-              height: 100,
-              color: Colors.black.withAlpha((0.4 * 255).toInt()),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(child: Center(child: _buildBarcode(_barcode))),
-                ],
-              ),
-            ),
-          ),
           Align(
             alignment: Alignment.topRight,
             child: IconButton(
