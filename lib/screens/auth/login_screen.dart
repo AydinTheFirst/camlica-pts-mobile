@@ -2,7 +2,6 @@ import 'package:camlica_pts/components/styled_button.dart';
 import 'package:camlica_pts/screens/auth/twofa_login_screen.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -42,37 +41,6 @@ class LoginScreenState extends State<LoginScreen> {
       Get.to(TwoFactorLoginScreen(
         username: _usernameController.text,
         password: _passwordController.text,
-      ));
-    } on DioException catch (e) {
-      HttpService.handleError(
-        e,
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _loginAsAdmin() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      await HttpService.dio.post(
-        '/auth/login',
-        data: {
-          'username': 'admin',
-          'password': 'admin',
-        },
-      );
-
-      ToastService.success(message: "Doğrulama kodu gönderildi!");
-
-      Get.to(TwoFactorLoginScreen(
-        username: 'admin',
-        password: 'admin',
       ));
     } on DioException catch (e) {
       HttpService.handleError(
