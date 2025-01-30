@@ -3,6 +3,7 @@ import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:camlica_pts/services/token_storage.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -108,6 +109,10 @@ class _TwoFactorLoginScreenState extends State<TwoFactorLoginScreen> {
                   return null;
                 },
               ),
+              kDebugMode
+                  ? const Text(
+                      'Eğer admin olarak giriş yaptıysanız 123456 kodunu kullanabilirsiniz')
+                  : const SizedBox(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
