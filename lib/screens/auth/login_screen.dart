@@ -142,7 +142,7 @@ class LoginScreenState extends State<LoginScreen> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Lütfen şifrenizi girin';
-                  } else if (value.length < 6) {
+                  } else if (value.length < 4) {
                     return 'Şifreniz en az 6 karakter olmalıdır';
                   }
                   return null;
@@ -154,15 +154,6 @@ class LoginScreenState extends State<LoginScreen> {
                 fullWidth: true,
                 child: const Text('Giriş Yap'),
               ),
-              SizedBox(height: 10),
-              kDebugMode
-                  ? StyledButton(
-                      isLoading: _isLoading,
-                      onPressed: _loginAsAdmin,
-                      fullWidth: true,
-                      child: const Text('Admin Olarak Giriş Yap'),
-                    )
-                  : const SizedBox.shrink(),
             ],
           ),
         ),

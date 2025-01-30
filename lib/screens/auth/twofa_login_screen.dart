@@ -109,10 +109,6 @@ class _TwoFactorLoginScreenState extends State<TwoFactorLoginScreen> {
                   return null;
                 },
               ),
-              kDebugMode
-                  ? const Text(
-                      'Eğer admin olarak giriş yaptıysanız 123456 kodunu kullanabilirsiniz')
-                  : const SizedBox(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
