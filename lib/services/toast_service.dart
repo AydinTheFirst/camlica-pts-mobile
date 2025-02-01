@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 
 class ToastService {
   static void show(GetSnackBar snackbar) {
+    Get.closeAllSnackbars();
+
     Get.showSnackbar(GetSnackBar(
       title: snackbar.title ?? "Hata!",
       message: snackbar.message ?? "Bir hata oluştu.",

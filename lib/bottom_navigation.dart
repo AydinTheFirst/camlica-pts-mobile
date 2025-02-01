@@ -7,31 +7,48 @@ import 'screens/home_screen.dart';
 import 'screens/profile_screen.dart';
 
 class BottomNavigation extends StatefulWidget {
-  const BottomNavigation({super.key});
+  final String currentKey;
+
+  const BottomNavigation({super.key, required this.currentKey});
 
   @override
   BottomNavigationState createState() => BottomNavigationState();
 }
 
 class BottomNavigationState extends State<BottomNavigation> {
-  int _currentIndex = 0;
+  String _currentKey = 'home';
 
-  final List<Widget> _screens = [
-    HomeScreen(),
-    TasksScreen(),
-    QrScreen(),
-    LogsScreen(),
-    ProfileScreen(),
+  final List<Map<String, Widget>> _screens = [
+    {'home': HomeScreen()},
+    {'tasks': TasksScreen()},
+    {'qr': QrScreen()},
+    {'logs': LogsScreen()},
+    {'profile': ProfileScreen()},
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _currentKey = widget.currentKey;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    int currentIndex =
+        _screens.indexWhere((element) => element.keys.first == _currentKey);
+
+    void handleTap(int index) {
+      setState(() {
+        _currentKey = _screens[index].keys.first;
+      });
+    }
+
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: _screens[currentIndex].values.first,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: currentIndex,
         type: BottomNavigationBarType.fixed,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: handleTap,
         selectedItemColor: Theme.of(context).colorScheme.primary,
         items: const [
           BottomNavigationBarItem(

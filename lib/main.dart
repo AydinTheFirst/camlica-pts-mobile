@@ -40,11 +40,25 @@ class MyApp extends StatelessWidget {
       initialRoute: initialRoute,
       unknownRoute: GetPage(name: "/notfound", page: () => NotFoundScreen()),
       getPages: [
-        GetPage(name: "/", page: () => BottomNavigation()),
-        GetPage(name: "/profile", page: () => BottomNavigation()),
-        GetPage(name: "/logs", page: () => BottomNavigation()),
-        GetPage(name: "/qr", page: () => BottomNavigation()),
-        GetPage(name: "/tasks", page: () => BottomNavigation()),
+        GetPage(
+          name: "/",
+          page: () => BottomNavigation(currentKey: "home"),
+        ),
+        GetPage(
+            name: "/profile",
+            page: () => BottomNavigation(currentKey: "profile")),
+        GetPage(
+          name: "/logs",
+          page: () => BottomNavigation(currentKey: "logs"),
+        ),
+        GetPage(
+          name: "/qr",
+          page: () => BottomNavigation(currentKey: "qr"),
+        ),
+        GetPage(
+          name: "/tasks",
+          page: () => BottomNavigation(currentKey: "tasks"),
+        ),
         GetPage(name: "/tasks/add", page: () => TaskAddScreen()),
         GetPage(name: "/login", page: () => LoginScreen()),
         GetPage(name: "/forgot-password", page: () => ForgotPasswordScreen()),
