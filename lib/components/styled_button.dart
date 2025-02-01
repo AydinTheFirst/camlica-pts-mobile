@@ -64,8 +64,8 @@ class StyledButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadius[shape]!),
         ),
-        minimumSize: Size(fullWidth ? double.infinity : 120, 40),
-        maximumSize: Size(double.infinity, 40),
+        minimumSize: Size(fullWidth ? double.infinity : 120, 50),
+        maximumSize: Size(double.infinity, 50),
       ),
       child: isLoading
           ? Padding(
