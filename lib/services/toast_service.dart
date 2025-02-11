@@ -12,6 +12,7 @@ class ToastService {
       backgroundColor: snackbar.backgroundColor,
       snackPosition: SnackPosition.BOTTOM,
       icon: snackbar.icon ?? Icon(Icons.info, color: Colors.white),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 60),
     ));
   }
 

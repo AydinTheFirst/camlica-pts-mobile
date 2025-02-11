@@ -110,7 +110,7 @@ class LoginScreenState extends State<LoginScreen> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Lütfen şifrenizi girin';
-                  } else if (value.length < 4) {
+                  } else if (value.length < 6) {
                     return 'Şifreniz en az 6 karakter olmalıdır';
                   }
                   return null;

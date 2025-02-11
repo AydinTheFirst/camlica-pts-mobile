@@ -1,69 +1,34 @@
 import 'dart:io';
-
+import 'package:camlica_pts/components/file_picker_provider.dart';
 import 'package:camlica_pts/components/styled_button.dart';
+import 'package:camlica_pts/models/enums.dart';
 import 'package:camlica_pts/models/task_model.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:camlica_pts/main.dart';
+import 'package:image_picker/image_picker.dart';
 
-class TaskFileUploader extends StatefulWidget {
+class TaskFileUploader extends ConsumerWidget {
   final Task task;
 
   const TaskFileUploader({super.key, required this.task});
 
-  @override
-  State<TaskFileUploader> createState() => _TaskFileUploaderState();
-}
+  Future<void> _uploadImage(BuildContext context, WidgetRef ref) async {
+    final files = ref.read(filePickerProvider); // Seçilen dosyaları al
 
-class _TaskFileUploaderState extends State<TaskFileUploader> {
-  bool _isLoading = false;
-  List<XFile> files = [];
-  final _picker = ImagePicker();
-
-  Future<void> _openImagePicker() async {
-    final List<XFile> pickedImages =
-        await _picker.pickMultiImage(requestFullMetadata: true);
-
-    if (pickedImages.isEmpty) {
-      return ToastService.error(message: "Lütfen bir resim seçin");
+    if (files.isEmpty) {
+      ToastService.error(message: "Lütfen en az bir dosya seçin.");
+      return;
     }
-
-    logger.f('Picked images: $pickedImages');
-
-    setState(() {
-      files.addAll(pickedImages);
-    });
-  }
-
-  Future<void> _openCamera() async {
-    final XFile? pickedImage =
-        await _picker.pickImage(source: ImageSource.camera);
-
-    if (pickedImage == null) {
-      return ToastService.error(message: "Lütfen bir resim çekin");
-    }
-
-    logger.f('Picked image: $pickedImage');
-
-    setState(() {
-      files.add(pickedImage);
-    });
-  }
-
-  Future<void> _uploadImage() async {
-    setState(() {
-      _isLoading = true;
-    });
 
     try {
-      // Dosyayı form-data'ya ekle
       FormData formData = FormData();
 
       for (var file in files) {
-        String fileName = file.path.split('/').last; // Dosya adı
+        String fileName = file.path.split('/').last;
         formData.files.add(MapEntry(
           'files',
           await MultipartFile.fromFile(file.path, filename: fileName),
@@ -72,35 +37,36 @@ class _TaskFileUploaderState extends State<TaskFileUploader> {
 
       // HTTP isteği gönder
       final response = await HttpService.dio.post(
-        "/files", // Endpoint
+        "/files",
         data: formData,
         options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data', // Form-data olduğunu belirt
-          },
+          headers: {'Content-Type': 'multipart/form-data'},
         ),
       );
 
-      await HttpService.dio.patch("/tasks/${widget.task.id}", data: {
+      await HttpService.dio.patch("/tasks/${task.id}", data: {
         "files": response.data,
       });
 
-      // Başarılı sonuç
-      ToastService.success(message: "Resim başarıyla yüklendi");
+      await HttpService.dio.patch(
+        "/tasks/${task.id}/status",
+        data: {
+          "status": TaskStatus.DONE.name,
+        },
+      );
+
+      // Başarı mesajı ve provider temizleme
+      ToastService.success(message: "Resimler başarıyla yüklendi");
       queryClient.invalidateQueries(["tasks"]);
-      setState(() {
-        files = [];
-      });
+      ref
+          .read(filePickerProvider.notifier)
+          .clearFiles(); // Dosya listesini temizle
     } on DioException catch (e) {
       HttpService.handleError(e);
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
-  Future<void> _openBottomSheet() async {
+  Future<void> _openBottomSheet(BuildContext context, WidgetRef ref) async {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -117,7 +83,7 @@ class _TaskFileUploaderState extends State<TaskFileUploader> {
                 title: Text("Galeriden Seç"),
                 onTap: () async {
                   Navigator.pop(context);
-                  await _openImagePicker();
+                  await ref.read(filePickerProvider.notifier).openGallery();
                 },
               ),
               ListTile(
@@ -125,7 +91,7 @@ class _TaskFileUploaderState extends State<TaskFileUploader> {
                 title: Text("Kamerayı Aç"),
                 onTap: () async {
                   Navigator.pop(context);
-                  await _openCamera();
+                  await ref.read(filePickerProvider.notifier).openCamera();
                 },
               ),
             ],
@@ -135,26 +101,43 @@ class _TaskFileUploaderState extends State<TaskFileUploader> {
     );
   }
 
-  Widget _buildImages(BuildContext context) {
+  Widget _buildImages(BuildContext context, List<XFile> files, WidgetRef ref) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: files.isEmpty
             ? [Text("Dosya Bulunamadı")]
             : files
                 .map(
-                  (file) => Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: Image.file(
-                        File(file.path),
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
+                  (file) => Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.file(
+                            File(file.path),
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
-                    ),
+                      Positioned(
+                        top: -5,
+                        right: -5,
+                        child: IconButton(
+                          onPressed: () {
+                            ref
+                                .read(filePickerProvider.notifier)
+                                .removeFile(file);
+                          },
+                          icon: Icon(Icons.cancel, color: Colors.red),
+                        ),
+                      )
+                    ],
                   ),
                 )
                 .toList(),
@@ -163,9 +146,10 @@ class _TaskFileUploaderState extends State<TaskFileUploader> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final files = ref.watch(filePickerProvider);
+
     return Column(
-      spacing: 10,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -175,19 +159,18 @@ class _TaskFileUploaderState extends State<TaskFileUploader> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        _buildImages(context),
+        _buildImages(context, files, ref),
         StyledButton(
           variant: Variants.secondary,
           fullWidth: true,
-          onPressed: _openBottomSheet,
+          onPressed: () => _openBottomSheet(context, ref),
           child: Text("Fotoğraf Ekle"),
         ),
         StyledButton(
           fullWidth: true,
           isDisabled: files.isEmpty,
-          isLoading: _isLoading,
-          onPressed: _uploadImage,
-          child: Text("Dosya Yükle"),
+          onPressed: () => _uploadImage(context, ref),
+          child: Text("Dosya Yükle ve Tamamla"),
         ),
       ],
     );

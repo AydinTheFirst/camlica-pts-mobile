@@ -4,6 +4,8 @@ enum Variants { primary, secondary, success, danger, warning, info }
 
 enum Shapes { rounded, circle, none }
 
+const double buttonHeight = 40;
+
 class StyledButton extends StatelessWidget {
   StyledButton({
     super.key,
@@ -64,8 +66,8 @@ class StyledButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadius[shape]!),
         ),
-        minimumSize: Size(fullWidth ? double.infinity : 120, 50),
-        maximumSize: Size(double.infinity, 50),
+        minimumSize: Size(fullWidth ? double.infinity : 120, buttonHeight),
+        maximumSize: Size(double.infinity, buttonHeight),
       ),
       child: isLoading
           ? Padding(

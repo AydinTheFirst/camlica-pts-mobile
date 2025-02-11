@@ -81,3 +81,8 @@ Future<AppConfig> getAppConfig() async {
   AppConfig appConfig = AppConfig.fromJson(res as Map<String, dynamic>);
   return appConfig;
 }
+
+Future<Map<String, dynamic>> getAPI(String path) async {
+  final res = await HttpService.fetcher(path);
+  return res as Map<String, dynamic>;
+}

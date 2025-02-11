@@ -1,14 +1,44 @@
+import 'dart:io';
+
+import 'package:camlica_pts/models/enums.dart';
 import 'package:camlica_pts/models/user_model.dart';
 import 'package:camlica_pts/providers.dart';
 import 'package:camlica_pts/components/styled_button.dart';
+import 'package:camlica_pts/services/http_service.dart';
+import 'package:camlica_pts/services/toast_service.dart';
 import 'package:camlica_pts/services/token_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fquery/fquery.dart';
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class ProfileScreen extends HookWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String appVersion = "";
+  String webVersion = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAppVersion();
+  }
+
+  void _fetchAppVersion() async {
+    final pkg = await PackageInfo.fromPlatform();
+    final info = await HttpService.fetcher("/");
+    setState(() {
+      appVersion = pkg.version;
+      webVersion = info["version"];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,17 +48,48 @@ class ProfileScreen extends HookWidget {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
-      body: ProfileCard(),
+      body: ProfileCard(
+        appVersion: appVersion,
+        webVersion: webVersion,
+      ),
     );
   }
 }
 
 class ProfileCard extends HookWidget {
-  const ProfileCard({super.key});
+  final String appVersion;
+  final String webVersion;
+
+  const ProfileCard({
+    super.key,
+    required this.appVersion,
+    required this.webVersion,
+  });
 
   void onLogout(BuildContext context) {
     TokenStorage.deleteToken();
     Get.offAllNamed("/login");
+  }
+
+  void getSupport(User user) async {
+    const phoneNumber = '+905434989203'; // Replace with your support number
+    final message = [
+      "Merhaba desteğe ihtiyacım var",
+      "Adım: ${user.firstName} ${user.lastName.toUpperCase()}",
+      "Numaram: ${user.phone ?? "-"}",
+      "Platform: ${Platform.operatingSystem}",
+      "Uygulama Sürümü: $appVersion",
+      "Sunucu Sürümü: $webVersion",
+    ].join("\n");
+
+    final whatsappUrl = Uri.parse(
+        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}');
+
+    if (await canLaunchUrl(whatsappUrl)) {
+      await launchUrl(whatsappUrl);
+    } else {
+      ToastService.error(message: "WhatsApp uygulaması bulunamadı");
+    }
   }
 
   @override
@@ -39,7 +100,7 @@ class ProfileCard extends HookWidget {
       return Center(child: CircularProgressIndicator());
     }
 
-    if (user.error != null) {
+    if (user.isError) {
       return Center(child: Text("Bir hata oluştu: ${user.error}"));
     }
 
@@ -75,6 +136,7 @@ class ProfileCard extends HookWidget {
     }
 
     final userData = user.data as User;
+    final bool isAdmin = userData.roles.contains(UserRole.ADMIN);
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -95,13 +157,24 @@ class ProfileCard extends HookWidget {
                     _buildRow("Soyad", userData.lastName),
                     _buildRow("Email", userData.email),
                     _buildRow("Telefon", userData.phone ?? "-"),
+                    _buildRow("Web Versiyon", webVersion),
+                    _buildRow("App Versiyon", appVersion),
                     if (userData.birthDate != null)
                       _buildRow("Doğum Tarihi", userData.birthDate.toString()),
+                    isAdmin
+                        ? StyledButton(
+                            fullWidth: true,
+                            onPressed: () => onLogout(context),
+                            variant: Variants.danger,
+                            child: const Text("Çıkış Yap"),
+                          )
+                        : SizedBox.shrink(),
                     StyledButton(
-                      onPressed: () => onLogout(context),
-                      variant: Variants.danger,
-                      child: const Text("Çıkış Yap"),
-                    )
+                      fullWidth: true,
+                      onPressed: () => getSupport(userData),
+                      variant: Variants.success,
+                      child: Text("Destek Al"),
+                    ),
                   ],
                 ),
               ),

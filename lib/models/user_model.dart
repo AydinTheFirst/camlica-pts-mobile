@@ -12,6 +12,7 @@ class User {
   final String password;
   final String firstName;
   final String lastName;
+  final String? unitId;
   final DateTime? birthDate;
   final List<UserRole> roles;
 
@@ -20,6 +21,7 @@ class User {
     required this.username,
     required this.email,
     this.phone,
+    this.unitId,
     required this.password,
     required this.firstName,
     required this.lastName,

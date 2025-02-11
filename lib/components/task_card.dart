@@ -201,16 +201,6 @@ class _TaskCardState extends State<TaskCard> {
                 child: Text("Başla"),
               )
             : const SizedBox.shrink(),
-        widget.task.status == TaskStatus.IN_PROGRESS
-            ? StyledButton(
-                onPressed: () => onPressed(
-                  TaskStatus.DONE,
-                  context,
-                ),
-                variant: Variants.success,
-                child: Text("Tamamla"),
-              )
-            : const SizedBox.shrink(),
         widget.task.status == TaskStatus.DONE
             ? StyledButton(
                 onPressed: () => onPressed(

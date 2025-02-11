@@ -101,6 +101,7 @@ class TaskList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final tasks = useQuery(["tasks"], getTasks);
+    final profile = useQuery(["profile"], getProfile);
 
     if (tasks.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -115,9 +116,28 @@ class TaskList extends HookWidget {
       return const Center(child: Text("Görev bulunamadı"));
     }
 
+    final user = profile.data;
+
     // Filtreleme işlemi
-    final filteredTasks =
-        taskData.where((task) => task.status == state).toList();
+    final filteredTasks = taskData.where((task) {
+      switch (state) {
+        case TaskStatus.PENDING:
+          return task.status == TaskStatus.PENDING &&
+              task.unitId == user?.unitId;
+        case TaskStatus.IN_PROGRESS:
+          return task.status == TaskStatus.IN_PROGRESS &&
+              task.assignedToId == user?.id;
+        case TaskStatus.DONE:
+          return task.status == TaskStatus.DONE &&
+              task.assignedToId == user?.id;
+        case TaskStatus.APPROVED:
+          return task.status == TaskStatus.APPROVED &&
+              task.assignedToId == user?.id;
+        case TaskStatus.REJECTED:
+          return task.status == TaskStatus.REJECTED &&
+              task.unitId == user?.unitId;
+      }
+    }).toList();
 
     if (filteredTasks.isEmpty) {
       return const Center(child: Text("Filtrelere uygun görev bulunamadı"));

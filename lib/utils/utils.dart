@@ -20,7 +20,7 @@ String translateTaskStatus(TaskStatus status) {
 
 String formatDate(DateTime date) {
   initializeDateFormatting('tr_TR', null);
-  return DateFormat('dd MMM yyyy', 'tr_TR').format(date);
+  return DateFormat('HH:mm dd MMM yyyy', 'tr_TR').format(date);
 }
 
 String formatTime(DateTime date) {

@@ -5,6 +5,7 @@ import 'package:camlica_pts/screens/not_found.dart';
 import 'package:camlica_pts/screens/task_add_screen.dart';
 import 'package:camlica_pts/services/token_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fquery/fquery.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -20,7 +21,7 @@ void main() async {
   final initialRoute = await TokenStorage.getToken() == null ? "/login" : "/";
   runApp(QueryClientProvider(
     queryClient: queryClient,
-    child: MyApp(initialRoute: initialRoute),
+    child: ProviderScope(child: MyApp(initialRoute: initialRoute)),
   ));
 }
 

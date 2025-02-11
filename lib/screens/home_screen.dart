@@ -1,8 +1,14 @@
+import 'dart:async';
+
+import 'package:camlica_pts/components/file_picker.dart';
 import 'package:camlica_pts/main.dart';
+import 'package:camlica_pts/models/post_model.dart';
 import 'package:camlica_pts/providers.dart';
+import 'package:camlica_pts/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fquery/fquery.dart';
+import 'package:get/get.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -19,10 +25,7 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           spacing: 20,
-          children: [
-            Welcome(),
-            Posts(),
-          ],
+          children: [Welcome(), Posts(), FilePicker()],
         ),
       ),
     );
@@ -132,9 +135,36 @@ class Welcome extends HookWidget {
 class Posts extends HookWidget {
   const Posts({super.key});
 
+  void showPost(Post post) {
+    // show dialog
+    Get.dialog(
+      AlertDialog(
+        title: Text(post.title),
+        content: Text(post.body),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("Kapat"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // regular refeth
+  void refetchPosts(Function refetch) {
+    Timer(Duration(seconds: 10), () {
+      refetch();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final posts = useQuery(["posts"], getPosts);
+
+    refetchPosts(posts.refetch);
 
     if (posts.isLoading) {
       return Center(child: CircularProgressIndicator());
@@ -173,7 +203,7 @@ class Posts extends HookWidget {
       child: Column(
         children: [
           Text(
-            "Gönderiler",
+            "Bildirimler",
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -183,16 +213,45 @@ class Posts extends HookWidget {
             shrinkWrap: true,
             itemCount: postsData.length,
             itemBuilder: (context, index) {
-              return Card(
-                margin: EdgeInsets.all(10),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(postsData[index].title),
-                      Text(postsData[index].body),
-                    ],
+              return GestureDetector(
+                onTap: () => showPost(postsData[index]),
+                child: Card(
+                  margin: EdgeInsets.all(10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      spacing: 10,
+                      children: [
+                        Row(
+                          spacing: 10,
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              child: Icon(Icons.notifications),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 10,
+                              children: [
+                                Text(
+                                  postsData[index].title,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20),
+                                ),
+                                Text(postsData[index].body),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(formatDate(postsData[index].createdAt)),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
               );
