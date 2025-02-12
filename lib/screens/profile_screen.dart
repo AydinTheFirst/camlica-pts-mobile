@@ -34,6 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _fetchAppVersion() async {
     final pkg = await PackageInfo.fromPlatform();
     final info = await HttpService.fetcher("/");
+
     setState(() {
       appVersion = pkg.version;
       webVersion = info["version"];
@@ -89,6 +90,16 @@ class ProfileCard extends HookWidget {
       await launchUrl(whatsappUrl);
     } else {
       ToastService.error(message: "WhatsApp uygulaması bulunamadı");
+    }
+  }
+
+  void openWeb(String path) async {
+    final url = Uri.parse("https://camlica-pts.riteknoloji.com$path");
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      ToastService.error(message: "Web sitesi açılamadı");
     }
   }
 
@@ -157,8 +168,6 @@ class ProfileCard extends HookWidget {
                     _buildRow("Soyad", userData.lastName),
                     _buildRow("Email", userData.email),
                     _buildRow("Telefon", userData.phone ?? "-"),
-                    _buildRow("Web Versiyon", webVersion),
-                    _buildRow("App Versiyon", appVersion),
                     if (userData.birthDate != null)
                       _buildRow("Doğum Tarihi", userData.birthDate.toString()),
                     isAdmin
@@ -169,17 +178,63 @@ class ProfileCard extends HookWidget {
                             child: const Text("Çıkış Yap"),
                           )
                         : SizedBox.shrink(),
-                    StyledButton(
-                      fullWidth: true,
-                      onPressed: () => getSupport(userData),
-                      variant: Variants.success,
-                      child: Text("Destek Al"),
-                    ),
                   ],
                 ),
               ),
             ),
           ),
+          Column(
+            children: [
+              Text(
+                "Uygulama hakkında",
+                style: TextStyle(
+                  fontSize: 20,
+                ),
+              ),
+              ListTile(
+                title: const Text(
+                  "Uygulama Sürümü",
+                ),
+                trailing: Text(
+                  appVersion,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              ListTile(
+                title: const Text(
+                  "Sunucu Sürümü",
+                ),
+                trailing: Text(
+                  webVersion,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              ListTile(
+                trailing: Icon(Icons.support_agent),
+                title: const Text(
+                  "Destek Al",
+                ),
+                onTap: () => getSupport(userData),
+              ),
+              ListTile(
+                trailing: Icon(Icons.privacy_tip),
+                title: const Text(
+                  "Gizlilik Politikası",
+                ),
+                onTap: () => openWeb("/privacy"),
+              ),
+              ListTile(
+                trailing: Icon(Icons.info),
+                title: const Text("Kullanım Koşulları"),
+                onTap: () => openWeb("/tos"),
+              ),
+              ListTile(
+                trailing: Icon(Icons.info),
+                title: const Text("Kvkk"),
+                onTap: () => openWeb("/kvkk"),
+              ),
+            ],
+          )
         ],
       ),
     );

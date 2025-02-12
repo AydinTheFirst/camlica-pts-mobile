@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:camlica_pts/components/file_picker.dart';
-import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/models/post_model.dart';
 import 'package:camlica_pts/providers.dart';
+import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fquery/fquery.dart';
 import 'package:get/get.dart';
 
@@ -23,10 +23,7 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          spacing: 20,
-          children: [Welcome(), Posts(), FilePicker()],
-        ),
+        child: Posts(),
       ),
     );
   }
@@ -132,7 +129,12 @@ class Welcome extends HookWidget {
   }
 }
 
-class Posts extends HookWidget {
+final postsProvider = FutureProvider<dynamic>((ref) async {
+  final data = await HttpService.fetcher("/posts");
+  return data;
+});
+
+class Posts extends ConsumerWidget {
   const Posts({super.key});
 
   void showPost(Post post) {
@@ -153,112 +155,84 @@ class Posts extends HookWidget {
     );
   }
 
-  // regular refeth
-  void refetchPosts(Function refetch) {
-    Timer(Duration(seconds: 10), () {
-      refetch();
-    });
-  }
-
   @override
-  Widget build(BuildContext context) {
-    final posts = useQuery(["posts"], getPosts);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final posts = ref.watch(postsProvider);
 
-    refetchPosts(posts.refetch);
+    return posts.when(
+      error: (error, stack) => Text('Error: $error'),
+      loading: () => Center(
+        child: CircularProgressIndicator(),
+      ),
+      data: (data) {
+        final posts = data.map((e) => Post.fromJson(e)).toList();
 
-    if (posts.isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    if (posts.isError) {
-      return Center(child: Text("Bir hata oluştu: ${posts.error}"));
-    }
-
-    if (posts.data == null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return RefreshIndicator(
+          onRefresh: () async {
+            ref.refresh(postsProvider);
+            return Future.value();
+          },
+          child: Column(
             children: [
-              Text("Durum güncellemeleri bulunamadı"),
-              IconButton(
-                onPressed: () {
-                  posts.refetch();
+              Text(
+                "Bildirimler",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: posts.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () => showPost(posts[index]),
+                    child: Card(
+                      margin: EdgeInsets.all(10),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          spacing: 10,
+                          children: [
+                            Row(
+                              spacing: 10,
+                              children: [
+                                CircleAvatar(
+                                  radius: 20,
+                                  child: Icon(Icons.notifications),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: 10,
+                                  children: [
+                                    Text(
+                                      posts[index].title,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20),
+                                    ),
+                                    Text(posts[index].body),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(formatDate(posts[index].createdAt)),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
                 },
-                icon: Icon(Icons.refresh),
               ),
             ],
           ),
-        ),
-      );
-    }
-
-    final postsData = posts.data!;
-
-    logger.i("postsData: $postsData");
-
-    return RefreshIndicator(
-      onRefresh: () => posts.refetch(),
-      child: Column(
-        children: [
-          Text(
-            "Bildirimler",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: postsData.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () => showPost(postsData[index]),
-                child: Card(
-                  margin: EdgeInsets.all(10),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      spacing: 10,
-                      children: [
-                        Row(
-                          spacing: 10,
-                          children: [
-                            CircleAvatar(
-                              radius: 20,
-                              child: Icon(Icons.notifications),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              spacing: 10,
-                              children: [
-                                Text(
-                                  postsData[index].title,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20),
-                                ),
-                                Text(postsData[index].body),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(formatDate(postsData[index].createdAt)),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

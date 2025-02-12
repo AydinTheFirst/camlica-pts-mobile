@@ -53,22 +53,18 @@ class StyledButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: isDisabled
-          ? null
-          : () {
-              if (isLoading) return;
-              onPressed();
-            },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isDisabled ? Colors.grey : colors[variant],
-        foregroundColor: isDisabled ? Colors.black : textColor[variant],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadius[shape]!),
-        ),
-        minimumSize: Size(fullWidth ? double.infinity : 120, buttonHeight),
-        maximumSize: Size(double.infinity, buttonHeight),
+    return MaterialButton(
+      onPressed: isDisabled || isLoading ? null : onPressed,
+      color: colors[variant],
+      disabledColor: colors[variant]!.withValues(
+        alpha: 0.8,
       ),
+      textColor: textColor[variant],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(borderRadius[shape]!),
+      ),
+      minWidth: fullWidth ? double.infinity : null,
+      height: buttonHeight,
       child: isLoading
           ? Padding(
               padding: const EdgeInsets.all(8.0),

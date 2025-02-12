@@ -1,11 +1,15 @@
 import 'package:camlica_pts/models/timelog_model.dart';
-import 'package:camlica_pts/providers.dart';
+import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fquery/fquery.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LogsScreen extends HookWidget {
+final logsProvider = AutoDisposeFutureProvider((ref) async {
+  final data = await HttpService.fetcher("/timelogs");
+  return data;
+});
+
+class LogsScreen extends StatelessWidget {
   const LogsScreen({super.key});
 
   @override
@@ -21,11 +25,10 @@ class LogsScreen extends HookWidget {
   }
 }
 
-class LogsTable extends HookWidget {
+class LogsTable extends ConsumerWidget {
   const LogsTable({super.key});
 
   String calculateTotal(TimeLog log) {
-    // log.total returns as ms convert it to hours and minutes
     if (log.total == 0) {
       return "-";
     }
@@ -38,78 +41,65 @@ class LogsTable extends HookWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final logs = useQuery(["attendances"], getTimeLogs);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final logsRef = ref.watch(logsProvider);
 
-    if (logs.isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
+    return logsRef.when(
+      error: (error, stackTrace) => Center(
+        child: Text('Error: $error'),
+      ),
+      loading: () => Center(
+        child: CircularProgressIndicator(),
+      ),
+      data: (data) {
+        final logs = data.map((e) => TimeLog.fromJson(e)).toList();
 
-    if (logs.error != null) {
-      return Center(child: Text("Bir hata oluştu: ${logs.error}"));
-    }
-
-    if (logs.data == null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return RefreshIndicator(
+          onRefresh: () {
+            ref.refresh(logsProvider);
+            return Future.value();
+          },
+          child: ListView(
             children: [
-              Text("Loglar bulunamadı"),
-              IconButton(
-                onPressed: () {
-                  logs.refetch();
-                },
-                icon: Icon(Icons.refresh),
+              DataTable(
+                columns: const [
+                  DataColumn(label: Text('Tarih')),
+                  DataColumn(label: Text('Giriş')),
+                  DataColumn(label: Text('Çıkış')),
+                  DataColumn(label: Text('Toplam')),
+                ],
+                rows: [
+                  for (final log in logs)
+                    DataRow(
+                      cells: [
+                        DataCell(Text(formatDate(log.createdAt))),
+                        DataCell(
+                          Text(
+                            formatTime(log.checkIn),
+                            style: TextStyle(
+                              color: log.isLateIn ? Colors.red : Colors.black,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            log.checkOut != null
+                                ? formatTime(log.checkOut!)
+                                : "-",
+                            style: TextStyle(
+                              color: log.isEarlyOut ? Colors.red : Colors.black,
+                            ),
+                          ),
+                        ),
+                        DataCell(Text(calculateTotal(log))),
+                      ],
+                    ),
+                ],
               ),
             ],
           ),
-        ),
-      );
-    }
-
-    final logsData = logs.data!;
-
-    return RefreshIndicator(
-      onRefresh: () => logs.refetch(),
-      child: ListView(
-        children: [
-          DataTable(
-            columns: const [
-              DataColumn(label: Text('Tarih')),
-              DataColumn(label: Text('Giriş')),
-              DataColumn(label: Text('Çıkış')),
-              DataColumn(label: Text('Toplam')),
-            ],
-            rows: [
-              for (final log in logsData)
-                DataRow(
-                  cells: [
-                    DataCell(Text(formatDate(log.createdAt))),
-                    DataCell(
-                      Text(
-                        formatTime(log.checkIn),
-                        style: TextStyle(
-                          color: log.isLateIn ? Colors.red : Colors.black,
-                        ),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        log.checkOut != null ? formatTime(log.checkOut!) : "-",
-                        style: TextStyle(
-                          color: log.isEarlyOut ? Colors.red : Colors.black,
-                        ),
-                      ),
-                    ),
-                    DataCell(Text(calculateTotal(log))),
-                  ],
-                ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
