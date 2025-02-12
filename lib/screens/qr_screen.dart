@@ -40,6 +40,18 @@ class _BarcodeScannerSimpleState extends State<QrScreen> {
   Barcode? _barcode;
   ScanResult? _scanResult;
   bool _isScanning = false;
+  bool _isTorchEnabled = false;
+
+  void torchToggle() {
+    _controller.toggleTorch();
+    setIsTorchEnabled(!_isTorchEnabled);
+  }
+
+  void setIsTorchEnabled(bool value) {
+    setState(() {
+      _isTorchEnabled = value;
+    });
+  }
 
   void _handleBarcode(BarcodeCapture barcodes) {
     if (!mounted) return;
@@ -165,7 +177,7 @@ class _BarcodeScannerSimpleState extends State<QrScreen> {
             alignment: Alignment.topRight,
             child: IconButton(
               icon: Icon(
-                _controller.torchEnabled ? Icons.flash_off : Icons.flash_on,
+                _isTorchEnabled ? Icons.flash_off : Icons.flash_on,
                 color: Colors.white,
               ),
               onPressed: () {
