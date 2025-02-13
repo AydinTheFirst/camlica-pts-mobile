@@ -1,97 +1,120 @@
 import 'dart:io';
 
+import 'package:camlica_pts/components/confirm_dialog.dart';
+import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/models/enums.dart';
 import 'package:camlica_pts/models/user_model.dart';
-import 'package:camlica_pts/providers.dart';
-import 'package:camlica_pts/components/styled_button.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:camlica_pts/services/token_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fquery/fquery.dart';
-import 'package:get/get.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ProfileScreen extends StatefulWidget {
+User? profile;
+
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
-
-  @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  String appVersion = "";
-  String webVersion = "";
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchAppVersion();
-  }
-
-  void _fetchAppVersion() async {
-    final pkg = await PackageInfo.fromPlatform();
-    final info = await HttpService.fetcher("/");
-
-    setState(() {
-      appVersion = pkg.version;
-      webVersion = info["version"];
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil'),
+        title: Text('Profil'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
-      body: ProfileCard(
-        appVersion: appVersion,
-        webVersion: webVersion,
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            ProfileCard(),
+            Divider(),
+            Links(),
+          ],
+        ),
       ),
     );
   }
 }
 
-class ProfileCard extends HookWidget {
-  final String appVersion;
-  final String webVersion;
+final profileProvider = AutoDisposeFutureProvider((ref) async {
+  final data = HttpService.fetcher("/auth/@me");
+  return data;
+});
 
-  const ProfileCard({
-    super.key,
-    required this.appVersion,
-    required this.webVersion,
-  });
+class ProfileCard extends ConsumerWidget {
+  const ProfileCard({super.key});
 
-  void onLogout(BuildContext context) {
-    TokenStorage.deleteToken();
-    Get.offAllNamed("/login");
+  void logout() async {
+    await TokenStorage.deleteToken();
+    ToastService.success(message: "Çıkış yapıldı");
+    SystemNavigator.pop();
   }
 
-  void getSupport(User user) async {
-    const phoneNumber = '+905434989203'; // Replace with your support number
-    final message = [
-      "Merhaba desteğe ihtiyacım var",
-      "Adım: ${user.firstName} ${user.lastName.toUpperCase()}",
-      "Numaram: ${user.phone ?? "-"}",
-      "Platform: ${Platform.operatingSystem}",
-      "Uygulama Sürümü: $appVersion",
-      "Sunucu Sürümü: $webVersion",
-    ].join("\n");
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(profileProvider);
 
-    final whatsappUrl = Uri.parse(
-        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}');
+    return profileAsync.when(
+      data: (data) {
+        if (data is! Map<String, dynamic>) {
+          return Text('Error: Data is not a Map<String, dynamic>');
+        }
 
-    if (await canLaunchUrl(whatsappUrl)) {
-      await launchUrl(whatsappUrl);
-    } else {
-      ToastService.error(message: "WhatsApp uygulaması bulunamadı");
-    }
+        final user = User.fromJson(data);
+        profile = user;
+
+        final bool isAdmin = user.roles.contains(UserRole.ADMIN);
+
+        return Column(
+          children: [
+            ListTile(
+              leading: Icon(
+                Icons.person,
+                size: 40,
+              ),
+              title: Text("${user.firstName} ${user.lastName}"),
+              subtitle: Text(user.phone ?? 'Telefon numarası yok'),
+              trailing: IconButton(
+                icon: Icon(Icons.refresh),
+                onPressed: () {
+                  ref.refresh(profileProvider);
+                },
+              ),
+            ),
+            isAdmin
+                ? ListTile(
+                    leading: Icon(
+                      Icons.admin_panel_settings,
+                      size: 40,
+                    ),
+                    title: Text("Yönetici"),
+                    subtitle: Text("Bu kullanıcı yönetici"),
+                    trailing: IconButton(
+                      onPressed: () async {
+                        final confirmed = await showConfirmationDialog(context);
+                        if (confirmed) {
+                          logout();
+                        }
+                      },
+                      icon: Icon(Icons.logout),
+                      color: Colors.red,
+                    ),
+                  )
+                : Container(),
+          ],
+        );
+      },
+      loading: () => Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Text('Error: $error'),
+    );
   }
+}
+
+class Links extends StatelessWidget {
+  const Links({super.key});
 
   void openWeb(String path) async {
     final url = Uri.parse("https://camlica-pts.riteknoloji.com$path");
@@ -99,168 +122,76 @@ class ProfileCard extends HookWidget {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {
-      ToastService.error(message: "Web sitesi açılamadı");
+      throw 'Could not launch $url';
+    }
+  }
+
+  void openWhatsapp() async {
+    if (profile == null) {
+      ToastService.error(message: "Kullanıcı bilgileri yüklenemedi");
+      return;
+    }
+
+    final message = [
+      "Merhaba, Yardıma ihtiyacım var.",
+      "Ad: ${profile!.firstName} ${profile!.lastName}",
+      "Telefon: ${profile!.phone}",
+      "Platform: ${Platform.operatingSystem}",
+      "Uygulama Sürümü: ${packageInfo?.version ?? "Bilinmiyor"}",
+    ].join("\n");
+
+    const number = "905434989203";
+
+    final url =
+        Uri.parse("https://wa.me/$number?text=${Uri.encodeComponent(message)}");
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'Could not launch $url';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = useQuery(["user"], getProfile);
-
-    if (user.isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    if (user.isError) {
-      return Center(child: Text("Bir hata oluştu: ${user.error}"));
-    }
-
-    if (user.data == null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    Text("Kullanıcı bilgileri bulunamadı"),
-                    SizedBox(height: 10),
-                    Text(
-                      "Lütfen tekrar giriş yapın",
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.secondary),
-                    ),
-                  ],
-                ),
-              ),
-              StyledButton(
-                onPressed: () => Get.toNamed("/login"),
-                child: const Text("Giriş Yap"),
-              ),
-            ],
-          ),
+    return Column(
+      children: [
+        ListTile(
+          leading: Icon(Icons.support_agent),
+          title: Text("Destek"),
+          trailing: Icon(Icons.open_in_browser),
+          onTap: openWhatsapp,
         ),
-      );
-    }
-
-    final userData = user.data as User;
-    final bool isAdmin = userData.roles.contains(UserRole.ADMIN);
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        return user.refetch();
-      },
-      child: ListView(
-        children: [
-          Center(
-            child: Card(
-              margin: const EdgeInsets.all(20),
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  spacing: 20,
-                  children: [
-                    _buildRow("Ad", userData.firstName),
-                    _buildRow("Soyad", userData.lastName),
-                    _buildRow("Email", userData.email),
-                    _buildRow("Telefon", userData.phone ?? "-"),
-                    if (userData.birthDate != null)
-                      _buildRow("Doğum Tarihi", userData.birthDate.toString()),
-                    isAdmin
-                        ? StyledButton(
-                            fullWidth: true,
-                            onPressed: () => onLogout(context),
-                            variant: Variants.danger,
-                            child: const Text("Çıkış Yap"),
-                          )
-                        : SizedBox.shrink(),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Column(
-            children: [
-              Text(
-                "Uygulama hakkında",
-                style: TextStyle(
-                  fontSize: 20,
-                ),
-              ),
-              ListTile(
-                title: const Text(
-                  "Uygulama Sürümü",
-                ),
-                trailing: Text(
-                  appVersion,
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ),
-              ListTile(
-                title: const Text(
-                  "Sunucu Sürümü",
-                ),
-                trailing: Text(
-                  webVersion,
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ),
-              ListTile(
-                trailing: Icon(Icons.support_agent),
-                title: const Text(
-                  "Destek Al",
-                ),
-                onTap: () => getSupport(userData),
-              ),
-              ListTile(
-                trailing: Icon(Icons.privacy_tip),
-                title: const Text(
-                  "Gizlilik Politikası",
-                ),
-                onTap: () => openWeb("/privacy"),
-              ),
-              ListTile(
-                trailing: Icon(Icons.info),
-                title: const Text("Kullanım Koşulları"),
-                onTap: () => openWeb("/tos"),
-              ),
-              ListTile(
-                trailing: Icon(Icons.info),
-                title: const Text("Kvkk"),
-                onTap: () => openWeb("/kvkk"),
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-
-  // Yardımcı fonksiyon: Satırdaki metinleri dinamik şekilde oluşturur
-  Widget _buildRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-            ),
-          ),
-        ],
-      ),
+        ListTile(
+          leading: Icon(Icons.privacy_tip),
+          title: Text("Gizlilik Politikası"),
+          trailing: Icon(Icons.open_in_browser),
+          onTap: () => openWeb("/privacy"),
+        ),
+        ListTile(
+          leading: Icon(Icons.privacy_tip),
+          title: Text("KVKK"),
+          trailing: Icon(Icons.open_in_browser),
+          onTap: () => openWeb("/kvkk"),
+        ),
+        ListTile(
+          leading: Icon(Icons.privacy_tip),
+          title: Text("Kullanım Koşulları"),
+          trailing: Icon(Icons.open_in_browser),
+          onTap: () => openWeb("/tos"),
+        ),
+        ListTile(
+          leading: Icon(Icons.app_settings_alt),
+          title: Text("Uygulama Sürümü"),
+          subtitle: Text(packageInfo?.version ?? "Bilinmiyor"),
+          onLongPress: () async {
+            // write to clipboard
+            final textToCopy = packageInfo?.version ?? "Bilinmiyor";
+            await Clipboard.setData(ClipboardData(text: textToCopy));
+            ToastService.success(message: "Kopyalandı: $textToCopy");
+          },
+        ),
+      ],
     );
   }
 }

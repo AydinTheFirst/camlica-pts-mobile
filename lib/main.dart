@@ -9,8 +9,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fquery/fquery.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 final Logger logger = Logger();
+PackageInfo? packageInfo;
 
 final QueryClient queryClient = QueryClient(
   defaultQueryOptions: DefaultQueryOptions(),
@@ -19,6 +21,7 @@ final QueryClient queryClient = QueryClient(
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final initialRoute = await TokenStorage.getToken() == null ? "/login" : "/";
+  packageInfo = await PackageInfo.fromPlatform();
   runApp(QueryClientProvider(
     queryClient: queryClient,
     child: ProviderScope(child: MyApp(initialRoute: initialRoute)),

@@ -191,46 +191,25 @@ class Posts extends ConsumerWidget {
                 shrinkWrap: true,
                 itemCount: posts.length,
                 itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () => showPost(posts[index]),
-                    child: Card(
-                      margin: EdgeInsets.all(10),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          spacing: 10,
-                          children: [
-                            Row(
-                              spacing: 10,
-                              children: [
-                                CircleAvatar(
-                                  radius: 20,
-                                  child: Icon(Icons.notifications),
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 10,
-                                  children: [
-                                    Text(
-                                      posts[index].title,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20),
-                                    ),
-                                    Text(posts[index].body),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(formatDate(posts[index].createdAt)),
-                              ],
-                            )
-                          ],
-                        ),
+                  final post = posts[index];
+                  return Card(
+                    child: ListTile(
+                      leading: Icon(Icons.notifications),
+                      title: Text(post.title),
+                      subtitle: Column(
+                        spacing: 8,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(posts[index].body),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(formatDate(post.createdAt)),
+                            ],
+                          ),
+                        ],
                       ),
+                      onTap: () => showPost(posts[index]),
                     ),
                   );
                 },
