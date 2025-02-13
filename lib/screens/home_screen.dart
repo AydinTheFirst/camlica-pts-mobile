@@ -165,6 +165,12 @@ class Posts extends ConsumerWidget {
         child: CircularProgressIndicator(),
       ),
       data: (data) {
+        if (data == null) {
+          return Center(
+            child: Text("Veri bulunamadı"),
+          );
+        }
+
         final posts = data.map((e) => Post.fromJson(e)).toList();
 
         return RefreshIndicator(
