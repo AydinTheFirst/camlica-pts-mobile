@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "560374156115",
+    "project_id": "camlica-pts-86797",
+    "storage_bucket": "camlica-pts-86797.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:560374156115:android:56265ce462b85603b8afa6",
+        "android_client_info": {
+          "package_name": "com.example.camlica_pts"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeWRzhNxUnZMprp_U7G-Muir3CpYccAtA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

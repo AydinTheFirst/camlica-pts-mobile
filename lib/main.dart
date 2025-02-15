@@ -1,9 +1,12 @@
 import 'package:camlica_pts/bottom_navigation.dart';
+import 'package:camlica_pts/firebase_api.dart';
 import 'package:camlica_pts/screens/auth/forgot_password_screen.dart';
 import 'package:camlica_pts/screens/auth/login_screen.dart';
 import 'package:camlica_pts/screens/not_found.dart';
 import 'package:camlica_pts/screens/task_add_screen.dart';
 import 'package:camlica_pts/services/token_storage.dart';
+import 'package:camlica_pts/socket.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fquery/fquery.dart';
@@ -20,7 +23,14 @@ final QueryClient queryClient = QueryClient(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp();
+  await FirebaseApi().init();
+
+  await WebsocketClient().connect();
+
   final initialRoute = await TokenStorage.getToken() == null ? "/login" : "/";
+
   packageInfo = await PackageInfo.fromPlatform();
   runApp(QueryClientProvider(
     queryClient: queryClient,
