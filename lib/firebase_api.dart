@@ -1,5 +1,6 @@
 import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/services/http_service.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 void handleMessage(RemoteMessage message) {
@@ -14,8 +15,12 @@ class FirebaseApi {
   final _messaging = FirebaseMessaging.instance;
 
   void handleToken(String token) async {
-    await HttpService.dio.post("/auth/firebase", data: {"token": token});
-    logger.d("Firebase token updated: $token");
+    try {
+      await HttpService.dio.post("/auth/firebase", data: {"token": token});
+      logger.d("Firebase token updated: $token");
+    } on DioException catch (e) {
+      logger.e("Firebase token update failed: ${e.message}");
+    }
   }
 
   Future<void> init() async {

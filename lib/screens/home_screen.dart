@@ -67,14 +67,27 @@ class _NotificationButtonState extends ConsumerState<NotificationButton> {
       },
     );
 
+    if (notificationCount == 0) {
+      return button(context);
+    }
+
     return badges.Badge(
-      badgeContent: Text(notificationCount.toString()),
-      child: IconButton(
-        icon: const Icon(Icons.notifications),
-        onPressed: () {
-          Get.toNamed("/notifications");
-        },
+      badgeContent: Text(
+        notificationCount.toString(),
+        style: const TextStyle(color: Colors.white),
       ),
+      position: badges.BadgePosition.topEnd(top: 0, end: 0),
+      badgeAnimation: badges.BadgeAnimation.scale(),
+      child: button(context),
+    );
+  }
+
+  Widget button(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.notifications),
+      onPressed: () {
+        Get.toNamed("/notifications");
+      },
     );
   }
 }
