@@ -6,6 +6,7 @@ import 'package:camlica_pts/models/timelog_model.dart';
 import 'package:camlica_pts/models/unit_model.dart';
 import 'package:camlica_pts/models/user_model.dart';
 import 'package:camlica_pts/services/http_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<User> getProfile() async {
   final res = await HttpService.fetcher('/auth/@me');
@@ -86,3 +87,8 @@ Future<Map<String, dynamic>> getAPI(String path) async {
   final res = await HttpService.fetcher(path);
   return res as Map<String, dynamic>;
 }
+
+final notificationsProvider = AutoDisposeFutureProvider<dynamic>((ref) async {
+  final data = await HttpService.fetcher("/notifications");
+  return data;
+});
