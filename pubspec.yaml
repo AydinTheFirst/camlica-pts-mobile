@@ -1,8 +1,8 @@
 name: camlica_pts
-description: "A new Flutter project."
+description: "a new flutter project."
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0
+version: 1.1.0
 
 environment:
   sdk: ^3.6.0
@@ -29,11 +29,12 @@ dependencies:
   form_builder_validators: ^11.1.1
   form_builder_file_picker: ^4.3.0
   riverpod: ^2.6.1
-  form_builder_image_picker: ^4.1.0
+  form_builder_image_picker: ^4.2.0
   socket_io_client: ^3.0.2
   firebase_core: ^3.11.0
   firebase_messaging: ^15.2.2
   badges: ^3.1.2
+  form_builder: ^1.0.1
 
 dev_dependencies:
   flutter_test:
