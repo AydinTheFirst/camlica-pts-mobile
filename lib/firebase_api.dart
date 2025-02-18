@@ -36,9 +36,7 @@ class FirebaseApi {
 
     // **📌 Firebase token'ı APNs token geldikten sonra al**
     String? fcmToken = await _messaging.getToken();
-    if (fcmToken != null) {
-      handleToken(fcmToken);
-    }
+    handleToken(fcmToken ?? "");
 
     _messaging.onTokenRefresh.listen(handleToken);
     FirebaseMessaging.onMessage.listen(handleMessage);
