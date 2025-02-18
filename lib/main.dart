@@ -1,5 +1,6 @@
 import 'package:camlica_pts/bottom_navigation.dart';
 import 'package:camlica_pts/firebase_api.dart';
+import 'package:camlica_pts/firebase_options.dart';
 import 'package:camlica_pts/screens/auth/forgot_password_screen.dart';
 import 'package:camlica_pts/screens/auth/login_screen.dart';
 import 'package:camlica_pts/screens/not_found.dart';
@@ -25,7 +26,10 @@ final QueryClient queryClient = QueryClient(
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   await FirebaseApi().init();
 
   await WebsocketClient().connect();

@@ -4,11 +4,11 @@ import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 void handleMessage(RemoteMessage message) {
-  logger.d("Firebase message recieved: $message");
+  logger.d("Firebase message received: $message");
 }
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
-  logger.d("Firebase message recieved in background: $message");
+  logger.d("Firebase message received in background: $message");
 }
 
 class FirebaseApi {
@@ -26,10 +26,21 @@ class FirebaseApi {
   Future<void> init() async {
     await _messaging.requestPermission();
 
-    // Token refresh
-    await _messaging.getToken().then((token) => handleToken(token ?? ""));
-    _messaging.onTokenRefresh.listen(handleToken);
+    // **📌 APNs token alınana kadar bekle**
+    String? apnsToken;
+    while (apnsToken == null) {
+      apnsToken = await _messaging.getAPNSToken();
+      await Future.delayed(const Duration(seconds: 1));
+    }
+    logger.d("APNs token received: $apnsToken");
 
+    // **📌 Firebase token'ı APNs token geldikten sonra al**
+    String? fcmToken = await _messaging.getToken();
+    if (fcmToken != null) {
+      handleToken(fcmToken);
+    }
+
+    _messaging.onTokenRefresh.listen(handleToken);
     FirebaseMessaging.onMessage.listen(handleMessage);
     FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
