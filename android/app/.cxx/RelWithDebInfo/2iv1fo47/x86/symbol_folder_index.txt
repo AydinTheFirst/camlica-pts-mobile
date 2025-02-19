@@ -1,1 +1,0 @@
-/home/aydin/Documents/GitHub/camlica-pts-mobile/build/app/intermediates/cxx/RelWithDebInfo/2iv1fo47/obj/x86

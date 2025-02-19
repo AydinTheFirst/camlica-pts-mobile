@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "560374156115",
-    "project_id": "camlica-pts-86797",
-    "storage_bucket": "camlica-pts-86797.firebasestorage.app"
+    "project_number": "948840345517",
+    "project_id": "camlica-pts-e08e8",
+    "storage_bucket": "camlica-pts-e08e8.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:560374156115:android:56265ce462b85603b8afa6",
+        "mobilesdk_app_id": "1:948840345517:android:14cfb6d2602ebc6c49bb24",
         "android_client_info": {
           "package_name": "com.example.camlica_pts"
         }
@@ -15,7 +15,26 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAeWRzhNxUnZMprp_U7G-Muir3CpYccAtA"
+          "current_key": "AIzaSyB6Cd7_OJ9cc7_-JuhGKWIqPJi37DlgodY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:948840345517:android:f19f42e7d86aed6449bb24",
+        "android_client_info": {
+          "package_name": "com.riteknoloji.camlica_pts"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6Cd7_OJ9cc7_-JuhGKWIqPJi37DlgodY"
         }
       ],
       "services": {

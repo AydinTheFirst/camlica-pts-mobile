@@ -24,10 +24,7 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
@@ -59,6 +56,14 @@ class DefaultFirebaseOptions {
     projectId: 'camlica-pts-e08e8',
     storageBucket: 'camlica-pts-e08e8.firebasestorage.app',
     iosBundleId: 'com.riteknoloji.camlicaptss',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyB6Cd7_OJ9cc7_-JuhGKWIqPJi37DlgodY',
+    appId: '1:948840345517:android:f19f42e7d86aed6449bb24',
+    messagingSenderId: '948840345517',
+    projectId: 'camlica-pts-e08e8',
+    storageBucket: 'camlica-pts-e08e8.firebasestorage.app',
   );
 
 }

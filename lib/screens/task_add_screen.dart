@@ -13,7 +13,6 @@ import 'package:camlica_pts/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:get/get.dart';
@@ -95,19 +94,28 @@ class TaskAddForm extends ConsumerWidget {
   }
 }
 
-class TaskAddFormBody extends HookWidget {
+class TaskAddFormBody extends ConsumerStatefulWidget {
   final List<User> users;
   final List<Unit> units;
   final AppConfig config;
 
-  final _formKey = GlobalKey<FormBuilderState>();
-
-  TaskAddFormBody({
+  const TaskAddFormBody({
     super.key,
     required this.users,
     required this.units,
     required this.config,
   });
+
+  @override
+  ConsumerState<TaskAddFormBody> createState() => _TaskAddFormBodyState();
+}
+
+class _TaskAddFormBodyState extends ConsumerState<TaskAddFormBody> {
+  final _formKey = GlobalKey<FormBuilderState>();
+
+  final locationX = ValueNotifier<double>(0);
+  final locationY = ValueNotifier<double>(0);
+  final selectedMap = ValueNotifier<String>("");
 
   void handleSubmit() async {
     if (!_formKey.currentState!.saveAndValidate()) {
@@ -116,16 +124,18 @@ class TaskAddFormBody extends HookWidget {
 
     final data = _formKey.currentState!.value;
 
-    final selectedMap = jsonEncode(config.maps.firstWhere(
+    logger.d("TaskAddFormBody: $data");
+
+    final selectedMap = widget.config.maps.firstWhere(
       (map) => map.url == data["selectedMap"],
-    ));
+    );
 
     try {
       await HttpService.dio.post("/tasks", data: {
         ...data,
-        "locationX": double.parse(data["locationX"]),
-        "locationY": double.parse(data["locationY"]),
-        "selectedMap": selectedMap,
+        "selectedMap": jsonEncode(selectedMap),
+        "locationX": locationX.value,
+        "locationY": locationY.value,
       });
       logger.i("Task added");
       ToastService.success(message: "Görev eklendi");
@@ -141,10 +151,6 @@ class TaskAddFormBody extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locationX = useState(0.0);
-    final locationY = useState(0.0);
-    final selectedMap = useState(config.maps.first.url);
-
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -166,7 +172,7 @@ class TaskAddFormBody extends HookWidget {
                 validator: FormBuilderValidators.compose(
                   [FormBuilderValidators.required()],
                 ),
-                items: units.map((unit) {
+                items: widget.units.map((unit) {
                   return DropdownMenuItem(
                     value: unit.id,
                     child: Text(unit.name),
@@ -222,31 +228,41 @@ class TaskAddFormBody extends HookWidget {
                   [FormBuilderValidators.required()],
                 ),
                 onChanged: (value) => selectedMap.value = value.toString(),
-                items: config.maps.map((map) {
+                items: widget.config.maps.map((map) {
                   return DropdownMenuItem(
                     value: map.url,
                     child: Text(map.title),
                   );
                 }).toList(),
               ),
-              selectedMap.value != ""
-                  ? MapClickTracker(
-                      selectedMap: config.maps.firstWhere(
-                        (map) => map.url == selectedMap.value,
-                      ),
-                      onPositionSelected: (
-                          {required Map<String, double> position}) {
-                        locationX.value = position['x']!;
-                        locationY.value = position['y']!;
-                      },
-                    )
-                  : SizedBox.shrink(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Text("X: ${locationX.value}"),
-                  Text("Y: ${locationY.value}"),
-                ],
+              ValueListenableBuilder<String>(
+                valueListenable: selectedMap,
+                builder: (context, value, child) {
+                  return value != ""
+                      ? MapClickTracker(
+                          selectedMap: widget.config.maps.firstWhere(
+                            (map) => map.url == value,
+                          ),
+                          onPositionSelected: (
+                              {required Map<String, double> position}) {
+                            locationX.value = position['x']!;
+                            locationY.value = position['y']!;
+                          },
+                        )
+                      : SizedBox.shrink();
+                },
+              ),
+              ValueListenableBuilder(
+                valueListenable: locationX,
+                builder: (context, value, child) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text("X: ${locationX.value}"),
+                      Text("Y: ${locationY.value}"),
+                    ],
+                  );
+                },
               ),
               SizedBox(height: 20),
               StyledButton(

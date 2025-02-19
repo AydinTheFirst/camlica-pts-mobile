@@ -4,6 +4,7 @@ import 'package:camlica_pts/services/toast_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '/services/http_service.dart';
 
@@ -70,10 +71,12 @@ class LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 10,
             children: [
+              Spacer(),
               TextFormField(
                 controller: _usernameController,
                 decoration: const InputDecoration(
-                  labelText: 'Kullanıcı Adı',
+                  labelText: 'Telefon Numarası',
+                  helperText: 'Örn: 5551234567',
                   prefixIcon: Icon(Icons.person),
                   border: OutlineInputBorder(),
                 ),
@@ -122,10 +125,47 @@ class LoginScreenState extends State<LoginScreen> {
                 fullWidth: true,
                 child: const Text('Giriş Yap'),
               ),
+              Spacer(),
+              Footer(),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class Footer extends StatelessWidget {
+  const Footer({super.key});
+
+  void openWeb(String path) async {
+    final url = Uri.parse("https://camlica-pts.riteknoloji.com$path");
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        TextButton(
+          onPressed: () => openWeb("/tos"),
+          child: const Text('Kullanım Koşulları'),
+        ),
+        TextButton(
+          onPressed: () => openWeb("/privacy"),
+          child: const Text('Gizlilik Politikası'),
+        ),
+        TextButton(
+          onPressed: () => openWeb("/kvkk"),
+          child: const Text('KVKK'),
+        ),
+      ],
     );
   }
 }

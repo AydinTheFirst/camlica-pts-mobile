@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:dio/dio.dart';
@@ -28,7 +30,9 @@ class FirebaseApi {
 
     // **📌 APNs token alınana kadar bekle**
     String? apnsToken;
-    while (apnsToken == null) {
+    // if ios
+    final isDarwin = Platform.isMacOS || Platform.isIOS;
+    while (apnsToken == null && isDarwin) {
       apnsToken = await _messaging.getAPNSToken();
       await Future.delayed(const Duration(seconds: 1));
     }

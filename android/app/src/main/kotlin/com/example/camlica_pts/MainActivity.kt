@@ -1,5 +1,5 @@
-package com.example.camlica_pts
+package com.riteknoloji.camlica_pts
 
 import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity: FlutterActivity()
+class MainActivity : FlutterActivity()

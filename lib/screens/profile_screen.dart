@@ -7,6 +7,7 @@ import 'package:camlica_pts/models/user_model.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:camlica_pts/services/token_storage.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -126,6 +127,14 @@ class Links extends StatelessWidget {
     }
   }
 
+  void testNotifications() async {
+    try {
+      await HttpService.dio.post("/notifications/test");
+    } on DioException catch (e) {
+      HttpService.handleError(e);
+    }
+  }
+
   void openWhatsapp() async {
     if (profile == null) {
       ToastService.error(message: "Kullanıcı bilgileri yüklenemedi");
@@ -156,6 +165,11 @@ class Links extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        ListTile(
+          leading: Icon(Icons.notifications),
+          title: Text("Bildirimleri Test Et"),
+          onTap: testNotifications,
+        ),
         ListTile(
           leading: Icon(Icons.support_agent),
           title: Text("Destek"),
