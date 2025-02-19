@@ -31,7 +31,8 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         },
       );
       ToastService.success(
-          message: "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi");
+          message:
+              "Şifre sıfırlama bağlantısı e-posta adresinize veya sms olarak gönderildi");
 
       await Future.delayed(Duration(seconds: 3));
       Get.toNamed("/login");
