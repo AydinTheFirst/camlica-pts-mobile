@@ -9,18 +9,17 @@ void notificationHandler(data) {
   ToastService.info(message: data["body"], title: data["title"]);
 }
 
-class WebsocketClient {
-  Future<void> connect() async {
-    final socket = io(apiUrl.replaceAll("/api", ""), <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': true,
-      "auth": {
-        'token': await TokenStorage.getToken(),
-      }
-    });
+Socket socket = io(apiUrl.replaceAll("/api", ""), <String, dynamic>{
+  'transports': ['websocket'],
+  'autoConnect': false,
+});
 
-    socket.onConnect((_) {
+class WebsocketClient {
+  static void connect() {
+    socket.onConnect((_) async {
       logger.d("Connected to websocket server");
+
+      socket.emit("auth", await TokenStorage.getToken());
     });
 
     socket.onDisconnect((_) {
@@ -28,5 +27,7 @@ class WebsocketClient {
     });
 
     socket.on("notification", notificationHandler);
+
+    socket.connect();
   }
 }

@@ -11,6 +11,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/route_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 User? profile;
@@ -105,6 +106,19 @@ class ProfileCard extends ConsumerWidget {
                     ),
                   )
                 : Container(),
+            isAdmin
+                ? ListTile(
+                    leading: Icon(
+                      Icons.qr_code,
+                      size: 40,
+                    ),
+                    title: Text("QR Kod"),
+                    subtitle: Text("Yönetici QR Kodu"),
+                    onTap: () {
+                      Get.toNamed("/admin-qr");
+                    },
+                  )
+                : Container()
           ],
         );
       },

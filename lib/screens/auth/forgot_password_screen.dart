@@ -72,7 +72,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         Icon(Icons.info, size: 16),
                         Flexible(
                           child: Text(
-                            'Şifre sıfırlama bağlantısı e-posta hesabınıza veya telefon numaranıza gönderilecektir.',
+                            'Şifre sıfırlama bağlantısı telefon numaranıza gönderildi.',
                             style: TextStyle(
                               fontSize: 12,
                             ),

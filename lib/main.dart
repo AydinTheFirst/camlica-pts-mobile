@@ -1,6 +1,7 @@
 import 'package:camlica_pts/bottom_navigation.dart';
 import 'package:camlica_pts/firebase_api.dart';
 import 'package:camlica_pts/firebase_options.dart';
+import 'package:camlica_pts/screens/admin_qr_page.dart';
 import 'package:camlica_pts/screens/auth/forgot_password_screen.dart';
 import 'package:camlica_pts/screens/auth/login_screen.dart';
 import 'package:camlica_pts/screens/not_found.dart';
@@ -33,7 +34,7 @@ void main() async {
 
   await FirebaseApi().init();
 
-  await WebsocketClient().connect();
+  WebsocketClient.connect();
 
   final initialRoute = await TokenStorage.getToken() == null ? "/login" : "/";
 
@@ -81,6 +82,7 @@ class MyApp extends StatelessWidget {
         ),
         GetPage(name: "/tasks/add", page: () => TaskAddScreen()),
         GetPage(name: "/notifications", page: () => NotificationsPage()),
+        GetPage(name: "/admin-qr", page: () => AdminQrPage()),
         GetPage(name: "/login", page: () => LoginScreen()),
         GetPage(name: "/forgot-password", page: () => ForgotPasswordScreen()),
       ],
