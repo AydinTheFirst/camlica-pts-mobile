@@ -1,3 +1,4 @@
+import 'package:camlica_pts/components/confirm_dialog.dart';
 import 'package:camlica_pts/components/styled_button.dart';
 import 'package:camlica_pts/components/task_file_uploader.dart';
 import 'package:camlica_pts/components/task_map_card.dart';
@@ -187,6 +188,12 @@ class _TaskCardState extends ConsumerState<TaskCard> {
   }
 
   void handleTaskDelete() async {
+    final confirmed = await showConfirmationDialog(context);
+
+    if (!confirmed) {
+      return;
+    }
+
     try {
       await HttpService.dio.delete("/tasks/${widget.task.id}");
       ToastService.success(message: "Görev silindi");
@@ -194,30 +201,6 @@ class _TaskCardState extends ConsumerState<TaskCard> {
     } on DioException catch (e) {
       HttpService.handleError(e);
     }
-  }
-
-  void handleTaskDeleteConfirm() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text("Görevi Sil"),
-        content: const Text("Görevi silmek istediğinize emin misiniz?"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: const Text("İptal"),
-          ),
-          TextButton(
-            onPressed: () {
-              handleTaskDelete();
-              Get.back();
-            },
-            child: const Text("Sil"),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget buildButtons(BuildContext context) {
@@ -262,7 +245,7 @@ class _TaskCardState extends ConsumerState<TaskCard> {
         ),
         if (isAdmin)
           StyledButton(
-            onPressed: () => handleTaskDeleteConfirm(),
+            onPressed: () => handleTaskDelete(),
             variant: Variants.danger,
             child: Text("Sil"),
           ),

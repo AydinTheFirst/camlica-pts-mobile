@@ -37,7 +37,7 @@ class NotificationButton extends ConsumerStatefulWidget {
 }
 
 class _NotificationButtonState extends ConsumerState<NotificationButton> {
-  int notificationCount = 5; // Example notification count
+  int notificationCount = 0; // Example notification count
 
   void setNotificationCount(int count) {
     setState(() {
