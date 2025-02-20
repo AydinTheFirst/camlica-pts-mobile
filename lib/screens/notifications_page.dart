@@ -31,6 +31,11 @@ class NotificationsPage extends ConsumerWidget {
     );
   }
 
+  void handleMarkAllAsRead(WidgetRef ref) async {
+    await HttpService.dio.post("/notifications/mark-all-seen");
+    ref.invalidate(notificationsProvider);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notificationsRef = ref.watch(notificationsProvider);
@@ -43,6 +48,10 @@ class NotificationsPage extends ConsumerWidget {
       ),
       body: notificationsRef.when(
         data: (notifications) {
+          if (notifications.isEmpty) {
+            return Center(child: Text("Henüz bildirim yok."));
+          }
+
           return RefreshIndicator(
             onRefresh: () async {
               ref.refresh(notificationsProvider);
@@ -79,6 +88,10 @@ class NotificationsPage extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text("Error: $error")),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => handleMarkAllAsRead(ref),
+        child: Icon(Icons.mark_chat_read_sharp),
       ),
     );
   }
