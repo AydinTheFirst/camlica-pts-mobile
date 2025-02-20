@@ -1,12 +1,11 @@
 import 'package:camlica_pts/components/task_card.dart';
 import 'package:camlica_pts/providers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fquery/fquery.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import '/models/enums.dart';
 
-class TasksScreen extends HookWidget {
+class TasksScreen extends ConsumerWidget {
   const TasksScreen({super.key});
 
   void onPressed() {
@@ -14,12 +13,15 @@ class TasksScreen extends HookWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final profile = useQuery(["profile"], getProfile);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(profileProvider);
 
-    final bool isAdminOrManager = profile.data != null &&
-        (profile.data!.roles.contains(UserRole.MANAGER) ||
-            profile.data!.roles.contains(UserRole.ADMIN));
+    final profile = profileAsync.maybeWhen(
+      orElse: () => null,
+      data: (data) => data,
+    );
+
+    final bool isAdmin = profile?.roles.contains(UserRole.ADMIN) ?? false;
 
     return Scaffold(
       appBar: AppBar(
@@ -28,7 +30,7 @@ class TasksScreen extends HookWidget {
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
       body: const TasksTab(),
-      floatingActionButton: isAdminOrManager
+      floatingActionButton: isAdmin
           ? FloatingActionButton(
               onPressed: onPressed,
               child: const Icon(Icons.add),
@@ -93,49 +95,44 @@ class _TasksTabState extends State<TasksTab>
   }
 }
 
-class TaskList extends HookWidget {
+class TaskList extends ConsumerWidget {
   final TaskStatus state;
 
   const TaskList({super.key, required this.state});
 
   @override
-  Widget build(BuildContext context) {
-    final tasks = useQuery(["tasks"], getTasks);
-    final profile = useQuery(["profile"], getProfile);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tasksAsync = ref.watch(tasksProvider);
+    final profileAsync = ref.watch(profileProvider);
 
-    if (tasks.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final tasks = tasksAsync.maybeWhen(
+      orElse: () => [],
+      data: (data) => data,
+    );
 
-    if (tasks.isError) {
-      return Center(child: Text("Bir hata oluştu: ${tasks.error}"));
-    }
-
-    final taskData = tasks.data;
-    if (taskData == null || taskData.isEmpty) {
-      return const Center(child: Text("Görev bulunamadı"));
-    }
-
-    final user = profile.data;
+    final profile = profileAsync.maybeWhen(
+      orElse: () => null,
+      data: (data) => data,
+    );
 
     // Filtreleme işlemi
-    final filteredTasks = taskData.where((task) {
+    final filteredTasks = tasks.where((task) {
       switch (state) {
         case TaskStatus.PENDING:
           return task.status == TaskStatus.PENDING &&
-              task.unitId == user?.unitId;
+              task.unitId == profile?.unitId;
         case TaskStatus.IN_PROGRESS:
           return task.status == TaskStatus.IN_PROGRESS &&
-              task.assignedToId == user?.id;
+              task.assignedToId == profile?.id;
         case TaskStatus.DONE:
           return task.status == TaskStatus.DONE &&
-              task.assignedToId == user?.id;
+              task.assignedToId == profile?.id;
         case TaskStatus.APPROVED:
           return task.status == TaskStatus.APPROVED &&
-              task.assignedToId == user?.id;
+              task.assignedToId == profile?.id;
         case TaskStatus.REJECTED:
           return task.status == TaskStatus.REJECTED &&
-              task.unitId == user?.unitId;
+              task.unitId == profile?.unitId;
       }
     }).toList();
 

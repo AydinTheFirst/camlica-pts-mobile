@@ -1,10 +1,8 @@
 import 'dart:async';
 
 import 'package:camlica_pts/main.dart';
-import 'package:camlica_pts/models/notification_model.dart';
 import 'package:camlica_pts/models/post_model.dart';
 import 'package:camlica_pts/providers.dart';
-import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/utils/utils.dart';
 
 import 'package:flutter/material.dart';
@@ -52,11 +50,7 @@ class _NotificationButtonState extends ConsumerState<NotificationButton> {
     final notificationsRef = ref.watch(notificationsProvider);
 
     notificationsRef.when(
-      data: (data) {
-        final notifications = (data as List<dynamic>)
-            .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
-            .toList();
-
+      data: (notifications) {
         final unseenNotifications =
             notifications.where((e) => !e.isSeen).toList();
         setNotificationCount(unseenNotifications.length);
@@ -92,11 +86,6 @@ class _NotificationButtonState extends ConsumerState<NotificationButton> {
   }
 }
 
-final postsProvider = FutureProvider<dynamic>((ref) async {
-  final data = await HttpService.fetcher("/posts");
-  return data;
-});
-
 class Posts extends ConsumerWidget {
   const Posts({super.key});
 
@@ -127,47 +116,34 @@ class Posts extends ConsumerWidget {
       loading: () => Center(
         child: CircularProgressIndicator(),
       ),
-      data: (data) {
-        if (data == null) {
-          return Center(
-            child: Text("Veri bulunamadı"),
-          );
-        }
-
-        final posts = data.map((e) => Post.fromJson(e)).toList();
-
+      data: (posts) {
         return RefreshIndicator(
           onRefresh: () async {
-            ref.refresh(postsProvider);
+            ref.invalidate(postsProvider);
             return Future.value();
           },
           child: ListView.builder(
             shrinkWrap: true,
             itemCount: posts.length,
             itemBuilder: (context, index) {
-              final post = posts[index] as Post;
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Card(
-                  child: ListTile(
-                    leading: Icon(Icons.message),
-                    title: Text(post.title),
-                    subtitle: Column(
-                      spacing: 8,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              final post = posts[index];
+              return ListTile(
+                leading: Icon(Icons.message),
+                title: Text(post.title),
+                subtitle: Column(
+                  spacing: 4,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(posts[index].body),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Text(posts[index].body),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(formatDate(post.createdAt)),
-                          ],
-                        ),
+                        Text(formatFullDate(post.createdAt)),
                       ],
                     ),
-                    onTap: () => showPost(posts[index]),
-                  ),
+                  ],
                 ),
+                onTap: () => showPost(posts[index]),
               );
             },
           ),

@@ -1,6 +1,5 @@
 import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/services/http_service.dart';
-import 'package:camlica_pts/services/toast_service.dart';
 import 'package:camlica_pts/services/token_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -38,8 +37,6 @@ class WebsocketClient {
     socket.onDisconnect((_) {
       logger.d("Disconnected from websocket server");
     });
-
-    socket.on("notification", notificationHandler);
 
     socket.connect();
   }

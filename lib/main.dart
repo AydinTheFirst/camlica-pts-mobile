@@ -13,17 +13,13 @@ import 'package:camlica_pts/socket.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fquery/fquery.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 final Logger logger = Logger();
 PackageInfo? packageInfo;
-
-final QueryClient queryClient = QueryClient(
-  defaultQueryOptions: DefaultQueryOptions(),
-);
+WidgetRef? globalRef;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,26 +28,25 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await FirebaseApi().init();
-
   WebsocketClient.connect();
 
   final initialRoute = await TokenStorage.getToken() == null ? "/login" : "/";
 
   packageInfo = await PackageInfo.fromPlatform();
-  runApp(QueryClientProvider(
-    queryClient: queryClient,
-    child: ProviderScope(child: MyApp(initialRoute: initialRoute)),
-  ));
+  runApp(ProviderScope(child: MyApp(initialRoute: initialRoute)));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   final String initialRoute;
 
   const MyApp({super.key, required this.initialRoute});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    globalRef = ref;
+
+    FirebaseApi().init();
+
     return GetMaterialApp(
       title: 'Çamlıca Camii PTS',
       theme: ThemeData(

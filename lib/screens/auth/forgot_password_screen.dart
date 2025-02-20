@@ -63,7 +63,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               TextFormField(
                 controller: _queryController,
                 decoration: const InputDecoration(
-                    labelText: 'Kullanıcı Adı',
+                    labelText: 'Telefon Numarası',
                     prefixIcon: Icon(Icons.person),
                     border: OutlineInputBorder(),
                     helper: Row(

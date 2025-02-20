@@ -7,6 +7,7 @@ import 'package:camlica_pts/models/app_config_model.dart';
 import 'package:camlica_pts/models/enums.dart';
 import 'package:camlica_pts/models/unit_model.dart';
 import 'package:camlica_pts/models/user_model.dart';
+import 'package:camlica_pts/providers.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:camlica_pts/utils/utils.dart';
@@ -32,21 +33,6 @@ class TaskAddScreen extends StatelessWidget {
     );
   }
 }
-
-final configProvider = AutoDisposeFutureProvider((ref) async {
-  final data = await HttpService.fetcher("/config");
-  return data;
-});
-
-final unitsProvider = AutoDisposeFutureProvider((ref) async {
-  final data = await HttpService.fetcher("/units");
-  return data;
-});
-
-final usersProvider = AutoDisposeFutureProvider((ref) async {
-  final data = await HttpService.fetcher("/users");
-  return data;
-});
 
 class TaskAddForm extends ConsumerWidget {
   const TaskAddForm({super.key});
@@ -139,7 +125,7 @@ class _TaskAddFormBodyState extends ConsumerState<TaskAddFormBody> {
       });
       logger.i("Task added");
       ToastService.success(message: "Görev eklendi");
-      queryClient.invalidateQueries(["tasks"]);
+      ref.invalidate(tasksProvider);
       Get.toNamed("/tasks");
     } on DioException catch (e) {
       HttpService.handleError(e);

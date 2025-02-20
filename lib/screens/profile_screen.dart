@@ -4,6 +4,7 @@ import 'package:camlica_pts/components/confirm_dialog.dart';
 import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/models/enums.dart';
 import 'package:camlica_pts/models/user_model.dart';
+import 'package:camlica_pts/providers.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:camlica_pts/services/token_storage.dart';
@@ -41,18 +42,13 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-final profileProvider = AutoDisposeFutureProvider((ref) async {
-  final data = HttpService.fetcher("/auth/@me");
-  return data;
-});
-
 class ProfileCard extends ConsumerWidget {
   const ProfileCard({super.key});
 
   void logout() async {
     await TokenStorage.deleteToken();
     ToastService.success(message: "Çıkış yapıldı");
-    SystemNavigator.pop();
+    Get.offAllNamed("/login");
   }
 
   @override
@@ -60,14 +56,7 @@ class ProfileCard extends ConsumerWidget {
     final profileAsync = ref.watch(profileProvider);
 
     return profileAsync.when(
-      data: (data) {
-        if (data is! Map<String, dynamic>) {
-          return Text('Error: Data is not a Map<String, dynamic>');
-        }
-
-        final user = User.fromJson(data);
-        profile = user;
-
+      data: (user) {
         final bool isAdmin = user.roles.contains(UserRole.ADMIN);
 
         return Column(

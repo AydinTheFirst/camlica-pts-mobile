@@ -10,30 +10,30 @@ import 'package:get/get.dart';
 class NotificationsPage extends ConsumerWidget {
   const NotificationsPage({super.key});
 
+  void viewNotification(NotificationModel notification, WidgetRef ref) async {
+    if (!notification.isSeen) {
+      await HttpService.dio.patch("/notifications/${notification.id}/seen");
+      ref.invalidate(notificationsProvider);
+    }
+
+    // show dialog
+    Get.dialog(
+      AlertDialog(
+        title: Text(notification.title),
+        content: Text(notification.body),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text("Kapat"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notificationsRef = ref.watch(notificationsProvider);
-
-    void viewNotification(NotificationModel notification, WidgetRef ref) async {
-      if (!notification.isSeen) {
-        await HttpService.dio.patch("/notifications/${notification.id}/seen");
-        ref.refresh(notificationsProvider);
-      }
-
-      // show dialog
-      Get.dialog(
-        AlertDialog(
-          title: Text(notification.title),
-          content: Text(notification.body),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(),
-              child: Text("Kapat"),
-            ),
-          ],
-        ),
-      );
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -42,11 +42,7 @@ class NotificationsPage extends ConsumerWidget {
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
       body: notificationsRef.when(
-        data: (data) {
-          final notifications = (data as List<dynamic>)
-              .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
-              .toList();
-
+        data: (notifications) {
           return RefreshIndicator(
             onRefresh: () async {
               ref.refresh(notificationsProvider);
@@ -55,33 +51,27 @@ class NotificationsPage extends ConsumerWidget {
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final notification = notifications[index];
-
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Card(
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.notifications,
-                        color: notification.isSeen ? Colors.black : Colors.blue,
-                      ),
-                      title: Text(notification.title),
-                      subtitle: Column(
-                        spacing: 8,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                return ListTile(
+                  leading: Icon(
+                    Icons.notifications,
+                    color: notification.isSeen ? Colors.black : Colors.blue,
+                  ),
+                  title: Text(notification.title),
+                  subtitle: Column(
+                    spacing: 4,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(notification.body),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        spacing: 4,
                         children: [
-                          Text(notification.body),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            spacing: 4,
-                            children: [
-                              Text(formatDate(notification.createdAt)),
-                            ],
-                          ),
+                          Text(formatFullDate(notification.createdAt)),
                         ],
                       ),
-                      onTap: () => viewNotification(notification, ref),
-                    ),
+                    ],
                   ),
+                  onTap: () => viewNotification(notification, ref),
                 );
               },
             ),
