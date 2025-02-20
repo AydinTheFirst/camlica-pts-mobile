@@ -2,11 +2,24 @@ import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:camlica_pts/services/token_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 void notificationHandler(data) {
   logger.d("Notification received: $data");
-  ToastService.info(message: data["body"], title: data["title"]);
+  Get.dialog(AlertDialog(
+    title: Text(data["title"]),
+    content: Text(data["body"]),
+    actions: [
+      TextButton(
+        onPressed: () {
+          Get.back();
+        },
+        child: Text("OK"),
+      ),
+    ],
+  ));
 }
 
 Socket socket = io(apiUrl.replaceAll("/api", ""), <String, dynamic>{
