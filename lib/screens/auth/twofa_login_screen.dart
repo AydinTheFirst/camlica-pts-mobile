@@ -100,6 +100,7 @@ class _TwoFactorLoginScreenState extends State<TwoFactorLoginScreen> {
             children: [
               FormBuilderTextField(
                 name: 'code',
+                keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'Doğrulama Kodu',
                   prefixIcon: Icon(Icons.verified),

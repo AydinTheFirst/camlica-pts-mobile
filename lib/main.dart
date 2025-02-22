@@ -5,7 +5,6 @@ import 'package:camlica_pts/screens/admin_qr_page.dart';
 import 'package:camlica_pts/screens/auth/forgot_password_screen.dart';
 import 'package:camlica_pts/screens/auth/login_screen.dart';
 import 'package:camlica_pts/screens/not_found.dart';
-import 'package:camlica_pts/screens/notifications_page.dart';
 import 'package:camlica_pts/screens/task_add_screen.dart';
 import 'package:camlica_pts/services/token_storage.dart';
 import 'package:camlica_pts/socket.dart';
@@ -66,7 +65,9 @@ class MyApp extends ConsumerWidget {
         GetPage(
             name: "/tasks", page: () => BottomNavigation(currentKey: "tasks")),
         GetPage(name: "/tasks/add", page: () => TaskAddScreen()),
-        GetPage(name: "/notifications", page: () => NotificationsPage()),
+        GetPage(
+            name: "/notifications",
+            page: () => BottomNavigation(currentKey: "notifications")),
         GetPage(name: "/admin-qr", page: () => AdminQrPage()),
         GetPage(name: "/login", page: () => LoginScreen()),
         GetPage(name: "/forgot-password", page: () => ForgotPasswordScreen()),

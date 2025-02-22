@@ -74,19 +74,21 @@ class LoginScreenState extends State<LoginScreen> {
               Spacer(),
               FormBuilderTextField(
                 name: "username",
+                keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(
                   labelText: 'Telefon Numarası',
                   helperText: 'Örn: 5551234567',
                   prefixIcon: Icon(Icons.person),
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Lütfen kullanıcı adınızı girin";
-                  }
-
-                  return null;
-                },
+                validator: FormBuilderValidators.compose(
+                  [
+                    FormBuilderValidators.phoneNumber(
+                      regex: RegExp(r'^[0-9]{10}$'),
+                      errorText: "Geçerli bir telefon numarası giriniz",
+                    )
+                  ],
+                ),
               ),
               FormBuilderTextField(
                   name: "password",
@@ -110,10 +112,12 @@ class LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ),
-                  validator: FormBuilderValidators.password(
-                    minLength: 6,
-                    errorText: "Şifre en az 6 karakter olmalıdır",
-                  )),
+                  validator: FormBuilderValidators.compose([
+                    FormBuilderValidators.minLength(
+                      6,
+                      errorText: "Şifre en az 6 karakter olmalıdır",
+                    ),
+                  ])),
               StyledButton(
                 isLoading: _isLoading,
                 onPressed: _login,
