@@ -1,3 +1,4 @@
+import 'package:camlica_pts/components/badges.dart';
 import 'package:camlica_pts/screens/notifications_page.dart';
 import 'package:flutter/material.dart';
 
@@ -54,8 +55,8 @@ class BottomNavigationState extends State<BottomNavigation> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Anasayfa',
+            icon: PostsBadge(),
+            label: 'Duyurular',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.task),
@@ -66,7 +67,7 @@ class BottomNavigationState extends State<BottomNavigation> {
             label: 'Qr Kod',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
+            icon: NotificationsBadge(),
             label: 'Bildirimler',
           ),
           BottomNavigationBarItem(

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/models/post_model.dart';
 import 'package:camlica_pts/providers.dart';
 import 'package:camlica_pts/utils/utils.dart';
@@ -8,7 +7,6 @@ import 'package:camlica_pts/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:badges/badges.dart' as badges;
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,68 +18,8 @@ class HomeScreen extends StatelessWidget {
         title: const Text('Anasayfa'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        actions: [
-          NotificationButton(),
-        ],
       ),
       body: Posts(),
-    );
-  }
-}
-
-class NotificationButton extends ConsumerStatefulWidget {
-  const NotificationButton({super.key});
-
-  @override
-  ConsumerState<NotificationButton> createState() => _NotificationButtonState();
-}
-
-class _NotificationButtonState extends ConsumerState<NotificationButton> {
-  int notificationCount = 0; // Example notification count
-
-  void setNotificationCount(int count) {
-    setState(() {
-      notificationCount = count;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final notificationsRef = ref.watch(notificationsProvider);
-
-    notificationsRef.when(
-      data: (notifications) {
-        final unseenNotifications =
-            notifications.where((e) => !e.isSeen).toList();
-        setNotificationCount(unseenNotifications.length);
-      },
-      loading: () {},
-      error: (error, stack) {
-        logger.e("Error: $error");
-      },
-    );
-
-    if (notificationCount == 0) {
-      return button(context);
-    }
-
-    return badges.Badge(
-      badgeContent: Text(
-        notificationCount.toString(),
-        style: const TextStyle(color: Colors.white),
-      ),
-      position: badges.BadgePosition.topEnd(top: 0, end: 0),
-      badgeAnimation: badges.BadgeAnimation.scale(),
-      child: button(context),
-    );
-  }
-
-  Widget button(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.notifications),
-      onPressed: () {
-        Get.toNamed("/notifications");
-      },
     );
   }
 }
