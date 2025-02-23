@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDcx5yLbc8B4chDHNdKjVNI2EaaXWtbbyg',
-    appId: '1:948840345517:ios:ee7c62122fd1d5d249bb24',
+    appId: '1:948840345517:ios:c7000413b844b7e349bb24',
     messagingSenderId: '948840345517',
     projectId: 'camlica-pts-e08e8',
     storageBucket: 'camlica-pts-e08e8.firebasestorage.app',
