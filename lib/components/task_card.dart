@@ -33,8 +33,10 @@ class _TaskCardState extends ConsumerState<TaskCard> {
     });
 
     try {
-      await HttpService.dio.patch("/tasks/${widget.task.id}/status",
-          data: {"status": status.name});
+      await HttpService.dio.patch(
+        "/tasks/${widget.task.id}/status",
+        data: {"status": status.name},
+      );
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -136,11 +138,7 @@ class _TaskCardState extends ConsumerState<TaskCard> {
 
   Widget buildMap(BuildContext context) {
     return widget.task.locationX != null && widget.task.locationY != null
-        ? TaskMapCard(
-            locationX: widget.task.locationX,
-            locationY: widget.task.locationY,
-            task: widget.task,
-          )
+        ? TaskMapCard(task: widget.task)
         : const Padding(
             padding: EdgeInsets.all(16.0),
             child: Text("Konum bilgisi bulunmamaktadır."),
