@@ -69,13 +69,9 @@ class TaskAddForm extends ConsumerWidget {
     logger.d("TaskAddForm: $units");
 
     return TaskAddFormBody(
-      users: (users as List<dynamic>)
-          .map<User>((user) => User.fromJson(user as Map<String, dynamic>))
-          .toList(),
-      units: (units as List<dynamic>)
-          .map<Unit>((unit) => Unit.fromJson(unit as Map<String, dynamic>))
-          .toList(),
-      config: AppConfig.fromJson(config as Map<String, dynamic>),
+      users: users,
+      units: units,
+      config: config,
     );
   }
 }

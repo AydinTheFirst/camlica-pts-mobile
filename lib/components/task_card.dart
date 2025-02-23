@@ -12,7 +12,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:photo_view/photo_view.dart';
 
 class TaskCard extends ConsumerStatefulWidget {
   final Task task;
@@ -266,8 +265,17 @@ class FullScreenImage extends StatelessWidget {
         title: const Text('Tam Ekran Resim'),
       ),
       body: Center(
-        child: PhotoView(
-          imageProvider: NetworkImage(imageUrl),
+        child: Image.network(
+          imageUrl,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) {
+              return child;
+            }
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          },
+          fit: BoxFit.contain,
         ),
       ),
     );

@@ -63,6 +63,14 @@ class _MapClickTrackerState extends State<MapClickTracker> {
             child: Image.network(
               HttpService.getFile(widget.selectedMap.url),
               fit: BoxFit.contain,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return child;
+                }
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
             ),
           ),
           if (_selectedPosition != null)

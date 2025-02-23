@@ -55,6 +55,32 @@ class ProfileCard extends ConsumerWidget {
     Get.offAllNamed("/login");
   }
 
+  void openWhatsapp(User? profile) async {
+    if (profile == null) {
+      ToastService.error(message: "Kullanıcı bilgileri yüklenemedi");
+      return;
+    }
+
+    final message = [
+      "Merhaba, Yardıma ihtiyacım var.",
+      "Ad: ${profile.firstName} ${profile.lastName}",
+      "Telefon: ${profile.phone}",
+      "Platform: ${Platform.operatingSystem}",
+      "Uygulama Sürümü: ${packageInfo?.version ?? "Bilinmiyor"}",
+    ].join("\n");
+
+    const number = "905434989203";
+
+    final url =
+        Uri.parse("https://wa.me/$number?text=${Uri.encodeComponent(message)}");
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(profileProvider);
@@ -111,7 +137,13 @@ class ProfileCard extends ConsumerWidget {
                       Get.toNamed("/admin-qr");
                     },
                   )
-                : Container()
+                : Container(),
+            ListTile(
+              leading: Icon(Icons.support_agent),
+              title: Text("Destek"),
+              trailing: Icon(Icons.open_in_browser),
+              onTap: () => openWhatsapp(user),
+            ),
           ],
         );
       },
@@ -162,32 +194,6 @@ class _LinksState extends State<Links> {
     }
   }
 
-  void openWhatsapp() async {
-    if (profile == null) {
-      ToastService.error(message: "Kullanıcı bilgileri yüklenemedi");
-      return;
-    }
-
-    final message = [
-      "Merhaba, Yardıma ihtiyacım var.",
-      "Ad: ${profile!.firstName} ${profile!.lastName}",
-      "Telefon: ${profile!.phone}",
-      "Platform: ${Platform.operatingSystem}",
-      "Uygulama Sürümü: ${packageInfo?.version ?? "Bilinmiyor"}",
-    ].join("\n");
-
-    const number = "905434989203";
-
-    final url =
-        Uri.parse("https://wa.me/$number?text=${Uri.encodeComponent(message)}");
-
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -196,12 +202,6 @@ class _LinksState extends State<Links> {
           leading: Icon(Icons.notifications),
           title: Text("Bildirimleri Test Et"),
           onTap: testNotifications,
-        ),
-        ListTile(
-          leading: Icon(Icons.support_agent),
-          title: Text("Destek"),
-          trailing: Icon(Icons.open_in_browser),
-          onTap: openWhatsapp,
         ),
         ListTile(
           leading: Icon(Icons.privacy_tip),

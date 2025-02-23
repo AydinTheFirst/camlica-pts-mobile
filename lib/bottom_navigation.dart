@@ -48,11 +48,8 @@ class BottomNavigationState extends State<BottomNavigation> {
       body: _screens[currentIndex].values.first,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-        type: BottomNavigationBarType.shifting,
+        type: BottomNavigationBarType.fixed,
         onTap: handleTap,
-        unselectedItemColor: Theme.of(context).colorScheme.secondary,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        backgroundColor: Theme.of(context).colorScheme.surface,
         items: const [
           BottomNavigationBarItem(
             icon: PostsBadge(),
