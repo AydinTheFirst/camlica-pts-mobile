@@ -3,6 +3,8 @@ import 'package:camlica_pts/screens/auth/twofa_login_screen.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -16,42 +18,40 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
 
-  Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
-
+  void setIsLoading(bool value) {
     setState(() {
-      _isLoading = true;
+      _isLoading = value;
     });
+  }
+
+  Future<void> _login() async {
+    if (!_formKey.currentState!.saveAndValidate()) return;
+    setIsLoading(true);
+
+    final data = _formKey.currentState!.value;
 
     try {
       await HttpService.dio.post(
         '/auth/login',
-        data: {
-          'username': _usernameController.text,
-          'password': _passwordController.text,
-        },
+        data: data,
       );
 
       ToastService.success(message: "Doğrulama kodu gönderildi!");
 
       Get.to(TwoFactorLoginScreen(
-        username: _usernameController.text,
-        password: _passwordController.text,
+        username: data['username'],
+        password: data['password'],
       ));
     } on DioException catch (e) {
       HttpService.handleError(
         e,
       );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
+
+    setIsLoading(false);
   }
 
   @override
@@ -65,60 +65,59 @@ class LoginScreenState extends State<LoginScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
+        child: FormBuilder(
           key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 10,
             children: [
               Spacer(),
-              TextFormField(
-                controller: _usernameController,
+              FormBuilderTextField(
+                name: "username",
+                keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(
                   labelText: 'Telefon Numarası',
                   helperText: 'Örn: 5551234567',
                   prefixIcon: Icon(Icons.person),
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Lütfen kullanıcı adınızı girin";
-                  }
-
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Şifre',
-                  prefixIcon: Icon(Icons.lock),
-                  border: OutlineInputBorder(),
-                  helper: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Get.toNamed("/forgot-password");
-                        },
-                        child: Text(
-                          'Şifremi unuttum!',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
-                  ),
+                validator: FormBuilderValidators.compose(
+                  [
+                    FormBuilderValidators.phoneNumber(
+                      regex: RegExp(r'^[0-9]{10}$'),
+                      errorText: "Geçerli bir telefon numarası giriniz",
+                    )
+                  ],
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Lütfen şifrenizi girin';
-                  } else if (value.length < 6) {
-                    return 'Şifreniz en az 6 karakter olmalıdır';
-                  }
-                  return null;
-                },
               ),
+              FormBuilderTextField(
+                  name: "password",
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Şifre',
+                    prefixIcon: Icon(Icons.lock),
+                    border: OutlineInputBorder(),
+                    helper: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Get.toNamed("/forgot-password");
+                          },
+                          child: Text(
+                            'Şifremi unuttum!',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  validator: FormBuilderValidators.compose([
+                    FormBuilderValidators.minLength(
+                      6,
+                      errorText: "Şifre en az 6 karakter olmalıdır",
+                    ),
+                  ])),
               StyledButton(
                 isLoading: _isLoading,
                 onPressed: _login,

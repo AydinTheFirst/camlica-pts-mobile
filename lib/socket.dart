@@ -38,8 +38,6 @@ class WebsocketClient {
       logger.d("Disconnected from websocket server");
     });
 
-    socket.on("notification", notificationHandler);
-
     socket.connect();
   }
 }

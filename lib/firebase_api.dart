@@ -1,16 +1,45 @@
 import 'dart:io';
 
 import 'package:camlica_pts/main.dart';
+import 'package:camlica_pts/providers.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-void handleMessage(RemoteMessage message) {
-  logger.d("Firebase message received: $message");
+void handleForegroundMessage(RemoteMessage message) {
+  logger.d("Firebase message received in foreground: $message");
+
+  if (Get.isDialogOpen ?? false) {
+    Get.back();
+  }
+
+  Get.dialog(
+    AlertDialog(
+      title: Text(message.notification?.title ?? ""),
+      content: Text(message.notification?.body ?? ""),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Get.back();
+          },
+          child: Text("OK"),
+        ),
+      ],
+    ),
+  );
+
+  globalRef?.invalidate(notificationsProvider);
 }
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
   logger.d("Firebase message received in background: $message");
+}
+
+void handleMessagePressed(RemoteMessage message) {
+  logger.d("Firebase message pressed: $message");
+  globalRef?.invalidate(notificationsProvider);
 }
 
 class FirebaseApi {
@@ -43,8 +72,8 @@ class FirebaseApi {
     handleToken(fcmToken ?? "");
 
     _messaging.onTokenRefresh.listen(handleToken);
-    FirebaseMessaging.onMessage.listen(handleMessage);
-    FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
+    FirebaseMessaging.onMessage.listen(handleForegroundMessage);
+    FirebaseMessaging.onMessageOpenedApp.listen(handleMessagePressed);
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
   }
 }

@@ -1,26 +1,29 @@
+import 'package:camlica_pts/components/confirm_dialog.dart';
 import 'package:camlica_pts/components/styled_button.dart';
 import 'package:camlica_pts/components/task_file_uploader.dart';
 import 'package:camlica_pts/components/task_map_card.dart';
-import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/models/enums.dart';
 import 'package:camlica_pts/models/task_model.dart';
+import 'package:camlica_pts/providers.dart';
 import 'package:camlica_pts/services/http_service.dart';
+import 'package:camlica_pts/services/toast_service.dart';
 import 'package:camlica_pts/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
-class TaskCard extends StatefulWidget {
+class TaskCard extends ConsumerStatefulWidget {
   final Task task;
 
   const TaskCard({super.key, required this.task});
 
   @override
-  State<TaskCard> createState() => _TaskCardState();
+  ConsumerState<TaskCard> createState() => _TaskCardState();
 }
 
-class _TaskCardState extends State<TaskCard> {
+class _TaskCardState extends ConsumerState<TaskCard> {
   bool _isLoading = false;
   bool _isMapExpanded = false;
   bool _isFilesExpanded = false;
@@ -43,9 +46,7 @@ class _TaskCardState extends State<TaskCard> {
         );
       }
 
-      // ignore: unused_result
-      queryClient.invalidateQueries(["tasks"]);
-      /*   widgetRef?.refresh(tasksProvider); */
+      ref.invalidate(tasksProvider);
     } on DioException catch (e) {
       HttpService.handleError(
         e,
@@ -118,9 +119,9 @@ class _TaskCardState extends State<TaskCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                      "Oluşturulma Tarihi: ${formatDate(widget.task.createdAt.toLocal())}"),
+                      "Oluşturulma Tarihi: ${formatFullDate(widget.task.createdAt)}"),
                   Text(
-                      "Güncellenme Tarihi: ${formatDate(widget.task.updatedAt.toLocal())}"),
+                      "Güncellenme Tarihi: ${formatFullDate(widget.task.updatedAt)}"),
                 ],
               ),
               buildButtons(context),
@@ -186,31 +187,68 @@ class _TaskCardState extends State<TaskCard> {
           );
   }
 
+  void handleTaskDelete() async {
+    final confirmed = await showConfirmationDialog(context);
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await HttpService.dio.delete("/tasks/${widget.task.id}");
+      ToastService.success(message: "Görev silindi");
+      ref.invalidate(tasksProvider);
+    } on DioException catch (e) {
+      HttpService.handleError(e);
+    }
+  }
+
   Widget buildButtons(BuildContext context) {
-    return Row(
+    final profileAsync = ref.watch(profileProvider);
+
+    final profile = profileAsync.maybeWhen(
+      orElse: () => null,
+      data: (user) => user,
+    );
+
+    final isAdmin = profile?.roles.contains(UserRole.ADMIN) ?? false;
+
+    return Column(
       mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        widget.task.status == TaskStatus.PENDING ||
-                widget.task.status == TaskStatus.REJECTED
-            ? StyledButton(
-                onPressed: () => onPressed(
-                  TaskStatus.IN_PROGRESS,
-                  context,
-                ),
-                variant: Variants.primary,
-                child: Text("Başla"),
-              )
-            : const SizedBox.shrink(),
-        widget.task.status == TaskStatus.DONE
-            ? StyledButton(
-                onPressed: () => onPressed(
-                  TaskStatus.PENDING,
-                  context,
-                ),
-                variant: Variants.danger,
-                child: Text("İptal"),
-              )
-            : const SizedBox.shrink(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            widget.task.status == TaskStatus.PENDING ||
+                    widget.task.status == TaskStatus.REJECTED
+                ? StyledButton(
+                    onPressed: () => onPressed(
+                      TaskStatus.IN_PROGRESS,
+                      context,
+                    ),
+                    variant: Variants.primary,
+                    child: Text("Başla"),
+                  )
+                : const SizedBox.shrink(),
+            widget.task.status == TaskStatus.DONE
+                ? StyledButton(
+                    onPressed: () => onPressed(
+                      TaskStatus.PENDING,
+                      context,
+                    ),
+                    variant: Variants.danger,
+                    child: Text("İptal"),
+                  )
+                : const SizedBox.shrink(),
+          ],
+        ),
+        if (isAdmin)
+          StyledButton(
+            onPressed: () => handleTaskDelete(),
+            variant: Variants.danger,
+            child: Text("Sil"),
+          ),
       ],
     );
   }

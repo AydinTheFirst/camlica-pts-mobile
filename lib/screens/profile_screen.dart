@@ -4,9 +4,11 @@ import 'package:camlica_pts/components/confirm_dialog.dart';
 import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/models/enums.dart';
 import 'package:camlica_pts/models/user_model.dart';
+import 'package:camlica_pts/providers.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:camlica_pts/services/token_storage.dart';
+import 'package:camlica_pts/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -41,18 +43,13 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-final profileProvider = AutoDisposeFutureProvider((ref) async {
-  final data = HttpService.fetcher("/auth/@me");
-  return data;
-});
-
 class ProfileCard extends ConsumerWidget {
   const ProfileCard({super.key});
 
   void logout() async {
     await TokenStorage.deleteToken();
     ToastService.success(message: "Çıkış yapıldı");
-    SystemNavigator.pop();
+    Get.offAllNamed("/login");
   }
 
   @override
@@ -60,14 +57,7 @@ class ProfileCard extends ConsumerWidget {
     final profileAsync = ref.watch(profileProvider);
 
     return profileAsync.when(
-      data: (data) {
-        if (data is! Map<String, dynamic>) {
-          return Text('Error: Data is not a Map<String, dynamic>');
-        }
-
-        final user = User.fromJson(data);
-        profile = user;
-
+      data: (user) {
         final bool isAdmin = user.roles.contains(UserRole.ADMIN);
 
         return Column(
@@ -128,8 +118,28 @@ class ProfileCard extends ConsumerWidget {
   }
 }
 
-class Links extends StatelessWidget {
+class Links extends StatefulWidget {
   const Links({super.key});
+
+  @override
+  State<Links> createState() => _LinksState();
+}
+
+class _LinksState extends State<Links> {
+  String? deviceId;
+
+  @override
+  void initState() {
+    super.initState();
+
+    getDeviceId().then(setDeviceId);
+  }
+
+  setDeviceId(String id) {
+    setState(() {
+      deviceId = id;
+    });
+  }
 
   void openWeb(String path) async {
     final url = Uri.parse("https://camlica-pts.riteknoloji.com$path");
@@ -218,6 +228,11 @@ class Links extends StatelessWidget {
             await Clipboard.setData(ClipboardData(text: textToCopy));
             ToastService.success(message: "Kopyalandı: $textToCopy");
           },
+        ),
+        ListTile(
+          leading: Icon(Icons.app_settings_alt),
+          title: Text("Cihaz ID"),
+          subtitle: Text(deviceId ?? "Bilinmiyor"),
         ),
       ],
     );

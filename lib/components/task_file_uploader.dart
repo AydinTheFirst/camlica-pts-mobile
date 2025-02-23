@@ -1,16 +1,17 @@
 import 'package:camlica_pts/components/styled_button.dart';
-import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/models/enums.dart';
 import 'package:camlica_pts/models/task_model.dart';
+import 'package:camlica_pts/providers.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:form_builder_image_picker/form_builder_image_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
-class TaskFileUploader extends StatefulWidget {
+class TaskFileUploader extends ConsumerStatefulWidget {
   final Task task;
 
   const TaskFileUploader({
@@ -19,10 +20,10 @@ class TaskFileUploader extends StatefulWidget {
   });
 
   @override
-  State<TaskFileUploader> createState() => _TaskFileUploaderState();
+  ConsumerState<TaskFileUploader> createState() => _TaskFileUploaderState();
 }
 
-class _TaskFileUploaderState extends State<TaskFileUploader> {
+class _TaskFileUploaderState extends ConsumerState<TaskFileUploader> {
   final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
 
@@ -68,10 +69,8 @@ class _TaskFileUploaderState extends State<TaskFileUploader> {
           "status": TaskStatus.DONE.name,
         },
       );
-
-      queryClient.invalidateQueries(["tasks"]);
-
       ToastService.success(message: "Göre başarıyla güncellendi!");
+      ref.invalidate(tasksProvider);
     } on DioException catch (e) {
       HttpService.handleError(e);
     }

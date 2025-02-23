@@ -84,13 +84,17 @@ class _BarcodeScannerSimpleState extends State<QrScreen> {
       final token = json['token'];
 
       try {
-        await HttpService.dio.get("/qrcode/scan/$token");
+        final res = await HttpService.fetcher("/qrcode/scan/$token");
         setState(() {
           _scanResult = ScanResult.fromJson(
             {"success": true, "type": type, "token": token},
           );
         });
-        ToastService.success(message: "İşlem başarılı");
+        final isWorking = res["action"] == "checkin";
+        ToastService.info(
+          message: !isWorking ? "Giriş Başarılı" : "Çıkış Başarılı",
+          title: "Başarılı",
+        );
       } on DioException catch (e) {
         HttpService.handleError(e);
         setState(() {

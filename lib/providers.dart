@@ -1,5 +1,5 @@
-import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/models/app_config_model.dart';
+import 'package:camlica_pts/models/notification_model.dart';
 import 'package:camlica_pts/models/post_model.dart';
 import 'package:camlica_pts/models/task_model.dart';
 import 'package:camlica_pts/models/timelog_model.dart';
@@ -8,87 +8,49 @@ import 'package:camlica_pts/models/user_model.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<User> getProfile() async {
-  final res = await HttpService.fetcher('/auth/@me');
-  logger.d("getProfile: $res");
-  User user = User.fromJson(res as Map<String, dynamic>);
-  return user;
-}
+final profileProvider = AutoDisposeFutureProvider<User>((ref) async {
+  final data = await HttpService.fetcher("/auth/@me");
+  return User.fromJson(data);
+});
 
-Future<List<Post>> getPosts() async {
-  final res = await HttpService.fetcher('/posts');
-  List<Post> posts = (res as List).map((e) => Post.fromJson(e)).toList();
+final postsProvider = AutoDisposeFutureProvider<List<Post>>((ref) async {
+  final data = await HttpService.fetcher("/posts");
+  final posts = List<Post>.from(data.map((x) => Post.fromJson(x)));
+  posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
   return posts;
-}
+});
 
-Future<Post> getPost(String id) async {
-  final res = await HttpService.fetcher('/posts/$id');
-  Post post = Post.fromJson(res as Map<String, dynamic>);
-  return post;
-}
+final tasksProvider = AutoDisposeFutureProvider<List<Task>>((ref) async {
+  final data = await HttpService.fetcher("/tasks");
+  return List<Task>.from(data.map((x) => Task.fromJson(x)));
+});
 
-Future<List<TimeLog>> getTimeLogs() async {
-  final res = await HttpService.fetcher('/timelogs');
-  List<TimeLog> timeLogs =
-      (res as List).map((e) => TimeLog.fromJson(e)).toList();
-  return timeLogs;
-}
+final timelogsProvider = AutoDisposeFutureProvider<List<TimeLog>>((ref) async {
+  final data = await HttpService.fetcher("/timelogs");
+  return List<TimeLog>.from(data.map((x) => TimeLog.fromJson(x)));
+});
 
-Future<TimeLog> getTimeLog(String id) async {
-  final res = await HttpService.fetcher('/timelogs/$id');
-  TimeLog timeLog = TimeLog.fromJson(res as Map<String, dynamic>);
-  return timeLog;
-}
+final unitsProvider = AutoDisposeFutureProvider<List<Unit>>((ref) async {
+  final data = await HttpService.fetcher("/units");
+  return List<Unit>.from(data.map((x) => Unit.fromJson(x)));
+});
 
-Future<List<Task>> getTasks() async {
-  final res = await HttpService.fetcher("/tasks");
-  List<Task> tasks = (res as List).map((e) => Task.fromJson(e)).toList();
-  return tasks;
-}
+final usersProvider = AutoDisposeFutureProvider<List<User>>((ref) async {
+  final data = await HttpService.fetcher("/users");
+  return List<User>.from(data.map((x) => User.fromJson(x)));
+});
 
-Future<Task> getTask(String id) async {
-  final res = await HttpService.fetcher("/tasks/$id");
-  Task task = Task.fromJson(res as Map<String, dynamic>);
-  return task;
-}
-
-Future<List<User>> getUsers() async {
-  final res = await HttpService.fetcher("/users");
-  List<User> users = (res as List).map((e) => User.fromJson(e)).toList();
-  return users;
-}
-
-Future<User> getUser(String id) async {
-  final res = await HttpService.fetcher("/users/$id");
-  User user = User.fromJson(res as Map<String, dynamic>);
-  return user;
-}
-
-Future<List<Unit>> getUnits() async {
-  final res = await HttpService.fetcher("/units");
-  logger.d("getUnits: $res");
-  List<Unit> units = (res as List).map((e) => Unit.fromJson(e)).toList();
-  return units;
-}
-
-Future<Unit> getUnit(String id) async {
-  final res = await HttpService.fetcher("/units/$id");
-  Unit unit = Unit.fromJson(res as Map<String, dynamic>);
-  return unit;
-}
-
-Future<AppConfig> getAppConfig() async {
-  final res = await HttpService.fetcher("/config");
-  AppConfig appConfig = AppConfig.fromJson(res as Map<String, dynamic>);
-  return appConfig;
-}
-
-Future<Map<String, dynamic>> getAPI(String path) async {
-  final res = await HttpService.fetcher(path);
-  return res as Map<String, dynamic>;
-}
-
-final notificationsProvider = AutoDisposeFutureProvider<dynamic>((ref) async {
+final notificationsProvider =
+    AutoDisposeFutureProvider<List<NotificationModel>>((ref) async {
   final data = await HttpService.fetcher("/notifications");
-  return data;
+  final notifications = List<NotificationModel>.from(
+      data.map((x) => NotificationModel.fromJson(x)));
+  notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+  return notifications;
+});
+
+final configProvider = AutoDisposeFutureProvider<AppConfig>((ref) async {
+  final data = await HttpService.fetcher("/config");
+  return AppConfig.fromJson(data);
 });

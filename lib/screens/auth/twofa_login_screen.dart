@@ -2,8 +2,11 @@ import 'package:camlica_pts/components/styled_button.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:camlica_pts/services/token_storage.dart';
+import 'package:camlica_pts/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:get/get.dart';
 
 class TwoFactorLoginScreen extends StatefulWidget {
@@ -21,16 +24,20 @@ class TwoFactorLoginScreen extends StatefulWidget {
 }
 
 class _TwoFactorLoginScreenState extends State<TwoFactorLoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _codeController = TextEditingController();
+  final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
 
-  void handleSubmit() async {
-    if (!_formKey.currentState!.validate()) return;
-
+  void setIsLoading(bool value) {
     setState(() {
-      _isLoading = true;
+      _isLoading = value;
     });
+  }
+
+  void handleSubmit() async {
+    if (!_formKey.currentState!.saveAndValidate()) return;
+    setIsLoading(true);
+
+    final data = _formKey.currentState!.value;
 
     try {
       final res = await HttpService.dio.post(
@@ -38,7 +45,8 @@ class _TwoFactorLoginScreenState extends State<TwoFactorLoginScreen> {
         data: {
           'username': widget.username,
           'password': widget.password,
-          "code": _codeController.text,
+          'code': data['code'],
+          "deviceId": await getDeviceId(),
         },
       );
 
@@ -50,11 +58,9 @@ class _TwoFactorLoginScreenState extends State<TwoFactorLoginScreen> {
       HttpService.handleError(
         e,
       );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
+
+    setIsLoading(false);
   }
 
   void handleResend() async {
@@ -86,27 +92,32 @@ class _TwoFactorLoginScreenState extends State<TwoFactorLoginScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
+        child: FormBuilder(
           key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 10,
             children: [
-              TextFormField(
-                controller: _codeController,
+              FormBuilderTextField(
+                name: 'code',
+                keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'Doğrulama Kodu',
                   prefixIcon: Icon(Icons.verified),
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Lütfen doğrulama kodunu girin';
-                  } else if (value.length != 6) {
-                    return 'Doğrulama kodu 6 karakter olmalıdır';
-                  }
-                  return null;
-                },
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(
+                    errorText: 'Bu alan boş bırakılamaz',
+                  ),
+                  FormBuilderValidators.numeric(
+                    errorText: 'Doğrulama kodu sadece rakamlardan oluşabilir',
+                  ),
+                  FormBuilderValidators.equalLength(
+                    6,
+                    errorText: "Doğrulama kodu 6 haneli olmalıdır",
+                  ),
+                ]),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
