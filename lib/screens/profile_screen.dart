@@ -31,12 +31,15 @@ class ProfileScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            ProfileCard(),
-            Divider(),
-            Links(),
-          ],
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            children: [
+              ProfileCard(),
+              Divider(),
+              Links(),
+            ],
+          ),
         ),
       ),
     );
