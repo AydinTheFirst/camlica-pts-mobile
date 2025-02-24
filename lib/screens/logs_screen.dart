@@ -36,7 +36,7 @@ class LogsTable extends ConsumerWidget {
       data: (logs) {
         return RefreshIndicator(
           onRefresh: () {
-            ref.refresh(timelogsProvider);
+            ref.invalidate(timelogsProvider);
             return Future.value();
           },
           child: ListView(

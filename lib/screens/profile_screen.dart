@@ -101,7 +101,7 @@ class ProfileCard extends ConsumerWidget {
               trailing: IconButton(
                 icon: Icon(Icons.refresh),
                 onPressed: () {
-                  ref.refresh(profileProvider);
+                  ref.invalidate(profileProvider);
                 },
               ),
             ),

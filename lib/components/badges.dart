@@ -1,4 +1,5 @@
 import 'package:camlica_pts/main.dart';
+import 'package:camlica_pts/models/enums.dart';
 import 'package:camlica_pts/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -93,6 +94,54 @@ class _PostsBadgeState extends ConsumerState<PostsBadge> {
         ),
       ),
       child: Icon(Icons.article),
+    );
+  }
+}
+
+class TasksBadge extends ConsumerStatefulWidget {
+  const TasksBadge({super.key});
+
+  @override
+  ConsumerState<TasksBadge> createState() => _TasksBadgeState();
+}
+
+class _TasksBadgeState extends ConsumerState<TasksBadge> {
+  int taskCount = 0; // Example task count
+
+  void setTaskCount(int count) {
+    setState(() {
+      taskCount = count;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tasksRef = ref.watch(tasksProvider);
+
+    tasksRef.when(
+      data: (tasks) {
+        final pendingTasks =
+            tasks.where((e) => e.status == TaskStatus.PENDING).toList();
+        setTaskCount(pendingTasks.length);
+      },
+      loading: () {},
+      error: (error, stack) {
+        logger.e("Error: $error");
+      },
+    );
+
+    if (taskCount == 0) {
+      return Icon(Icons.assignment);
+    }
+
+    return Badge(
+      label: Text(
+        taskCount.toString(),
+        style: TextStyle(
+          color: Colors.white,
+        ),
+      ),
+      child: Icon(Icons.assignment),
     );
   }
 }

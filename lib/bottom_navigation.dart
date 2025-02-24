@@ -19,12 +19,37 @@ class BottomNavigation extends StatefulWidget {
 class BottomNavigationState extends State<BottomNavigation> {
   String _currentKey = 'home';
 
-  final List<Map<String, Widget>> _screens = [
-    {'home': HomeScreen()},
-    {'tasks': TasksScreen()},
-    {'qr': QrScreen()},
-    {'notifications': NotificationsPage()},
-    {'profile': ProfileScreen()},
+  final _pages = [
+    {
+      "label": "Duyurular",
+      "key": "home",
+      "page": HomeScreen(),
+      "icon": PostsBadge()
+    },
+    {
+      "label": "Bildirimler",
+      "key": "notifications",
+      "page": NotificationsPage(),
+      "icon": NotificationsBadge()
+    },
+    {
+      "label": "Görevler",
+      "key": "tasks",
+      "page": TasksScreen(),
+      "icon": TasksBadge()
+    },
+    {
+      "label": "Qr Kod",
+      "key": "qr",
+      "page": QrScreen(),
+      "icon": Icon(Icons.qr_code)
+    },
+    {
+      "label": "Profil",
+      "key": "profile",
+      "page": ProfileScreen(),
+      "icon": Icon(Icons.person)
+    }
   ];
 
   @override
@@ -36,42 +61,28 @@ class BottomNavigationState extends State<BottomNavigation> {
   @override
   Widget build(BuildContext context) {
     int currentIndex =
-        _screens.indexWhere((element) => element.keys.first == _currentKey);
+        _pages.indexWhere((element) => element['key'] == _currentKey);
 
     void handleTap(int index) {
       setState(() {
-        _currentKey = _screens[index].keys.first;
+        _currentKey = _pages[index]['key'] as String;
       });
     }
 
     return Scaffold(
-      body: _screens[currentIndex].values.first,
+      body: _pages[currentIndex]['page'] as Widget,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         type: BottomNavigationBarType.fixed,
         onTap: handleTap,
-        items: const [
-          BottomNavigationBarItem(
-            icon: PostsBadge(),
-            label: 'Duyurular',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.task),
-            label: 'Görevler',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.qr_code),
-            label: 'Qr Kod',
-          ),
-          BottomNavigationBarItem(
-            icon: NotificationsBadge(),
-            label: 'Bildirimler',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
+        items: _pages
+            .map(
+              (page) => BottomNavigationBarItem(
+                icon: page['icon'] as Widget,
+                label: page['label'] as String,
+              ),
+            )
+            .toList(),
       ),
     );
   }

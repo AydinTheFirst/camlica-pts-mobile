@@ -65,12 +65,12 @@ class TaskMapCard extends StatelessWidget {
                     ),
                     if (x != null && y != null)
                       Positioned(
-                        left: x,
-                        top: y,
+                        left: x - 12,
+                        top: y - 24,
                         child: Icon(
                           Icons.location_on,
                           color: Colors.red,
-                          size: 30,
+                          size: 24,
                         ),
                       ),
                   ],

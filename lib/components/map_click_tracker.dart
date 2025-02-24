@@ -20,28 +20,25 @@ class MapClickTracker extends StatefulWidget {
 
 class _MapClickTrackerState extends State<MapClickTracker> {
   Offset? _selectedPosition;
-  final TransformationController _transformationController =
-      TransformationController();
+  final GlobalKey _imageKey =
+      GlobalKey(); // Image widget'ını takip etmek için key
 
   void _handleTap(BuildContext context, TapDownDetails details) {
-    // Get tap position within the InteractiveViewer
-    final RenderBox box = context.findRenderObject() as RenderBox;
-    final Offset localOffset = box.globalToLocal(details.globalPosition);
+    final RenderBox box =
+        _imageKey.currentContext!.findRenderObject() as RenderBox;
+    final Offset localOffset =
+        box.globalToLocal(details.globalPosition); // Doğru local koordinatı al
 
-    // Apply inverse of current transformation to get original offset
-    final Matrix4 inverseMatrix =
-        Matrix4.inverted(_transformationController.value);
-    final Offset originalOffset =
-        MatrixUtils.transformPoint(inverseMatrix, localOffset);
+    // Image'ın ekrandaki gerçek genişlik ve yüksekliğini al
+    final Size imageSize = box.size;
+
+    // Yüzde hesaplamasını doğru yapmak için
+    final double percentX = (localOffset.dx / imageSize.width) * 100;
+    final double percentY = (localOffset.dy / imageSize.height) * 100;
 
     setState(() {
-      _selectedPosition = originalOffset;
+      _selectedPosition = localOffset;
     });
-
-    // Use the widget's size (you may want this to be your image/container's size)
-    final Size size = box.size;
-    final double percentX = (originalOffset.dx / size.width) * 100;
-    final double percentY = (originalOffset.dy / size.height) * 100;
 
     widget.onPositionSelected(position: {
       'x': percentX,
@@ -52,38 +49,42 @@ class _MapClickTrackerState extends State<MapClickTracker> {
   @override
   Widget build(BuildContext context) {
     return InteractiveViewer(
-      transformationController: _transformationController,
-      boundaryMargin: const EdgeInsets.all(20.0),
-      minScale: 0.5,
-      maxScale: 4.0,
-      child: Stack(
-        children: [
-          GestureDetector(
-            onTapDown: (details) => _handleTap(context, details),
-            child: Image.network(
-              HttpService.getFile(widget.selectedMap.url),
-              fit: BoxFit.contain,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) {
-                  return child;
-                }
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              },
-            ),
-          ),
-          if (_selectedPosition != null)
-            Positioned(
-              left: _selectedPosition!.dx,
-              top: _selectedPosition!.dy,
-              child: const Icon(
-                Icons.location_on,
-                color: Colors.red,
-                size: 24,
-              ),
-            ),
-        ],
+      minScale: 1,
+      maxScale: 5,
+      child: GestureDetector(
+        onTapDown: (details) => _handleTap(context, details),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Stack(
+              children: [
+                Image.network(
+                  HttpService.getFile(widget.selectedMap.url),
+                  key:
+                      _imageKey, // Key ekleyerek RenderBox'a ulaşmamızı sağladık
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    }
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                ),
+                if (_selectedPosition != null)
+                  Positioned(
+                    left: _selectedPosition!.dx - 12,
+                    top: _selectedPosition!.dy - 24,
+                    child: const Icon(
+                      Icons.location_on,
+                      color: Colors.red,
+                      size: 24,
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

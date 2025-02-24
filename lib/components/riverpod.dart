@@ -54,7 +54,7 @@ class Riverpod extends ConsumerWidget {
                 Text("App Name: ${data["message"]}"),
                 StyledButton(
                   isLoading: app.isLoading || app.isRefreshing,
-                  onPressed: () => ref.refresh(appProvider),
+                  onPressed: () => ref.invalidate(appProvider),
                   variant: Variants.success,
                   child: Text("Press Me"),
                 ),

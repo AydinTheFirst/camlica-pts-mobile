@@ -54,7 +54,7 @@ class NotificationsPage extends ConsumerWidget {
 
           return RefreshIndicator(
             onRefresh: () async {
-              ref.refresh(notificationsProvider);
+              ref.invalidate(notificationsProvider);
             },
             child: ListView.builder(
               itemCount: notifications.length,

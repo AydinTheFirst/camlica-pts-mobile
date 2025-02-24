@@ -72,16 +72,17 @@ class _TaskCardState extends ConsumerState<TaskCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(widget.task.title,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
-                  Spacer(),
-                  Text(_isLoading
-                      ? "Güncelleniyor..."
-                      : translateTaskStatus(widget.task.status)),
+                  Text(
+                    _isLoading
+                        ? "Güncelleniyor..."
+                        : translateTaskStatus(widget.task.status),
+                  ),
                 ],
               ),
+              Text(widget.task.title,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
               Text(widget.task.description ?? "-"),
               const SizedBox(height: 10),
               ExpansionPanelList(

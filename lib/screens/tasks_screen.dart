@@ -140,11 +140,16 @@ class TaskList extends ConsumerWidget {
       return const Center(child: Text("Filtrelere uygun görev bulunamadı"));
     }
 
-    return ListView.builder(
-      itemCount: filteredTasks.length,
-      itemBuilder: (context, index) {
-        return TaskCard(task: filteredTasks[index]);
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(tasksProvider);
       },
+      child: ListView.builder(
+        itemCount: filteredTasks.length,
+        itemBuilder: (context, index) {
+          return TaskCard(task: filteredTasks[index]);
+        },
+      ),
     );
   }
 }

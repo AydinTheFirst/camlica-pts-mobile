@@ -66,7 +66,7 @@ class _AdminQrPageState extends ConsumerState<AdminQrPage> {
   void initState() {
     super.initState();
 
-    ref.refresh(scanTokenProvider);
+    ref.invalidate(scanTokenProvider);
 
     logger.f("Websocket connecting... $socket");
 
