@@ -10,7 +10,7 @@ const urlMapping = {
   "production": "https://camlica-pts.riteknoloji.com/api",
 };
 
-String apiUrl = urlMapping[kDebugMode ? "production" : "development"]!;
+String apiUrl = urlMapping[kReleaseMode ? "production" : "development"]!;
 
 class HttpService {
   static final Dio dio = Dio(BaseOptions(
