@@ -52,43 +52,41 @@ class _AdminQrPageState extends State<AdminQrPage> {
       appBar: AppBar(
         title: Text("QR"),
       ),
-      body: Expanded(
-        child: Center(
-          child: Column(
-            spacing: 16,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "QR Kodu ile Giriş/Çıkış Yap",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+      body: Center(
+        child: Column(
+          spacing: 16,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "QR Kodu ile Giriş/Çıkış Yap",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
               ),
-              scanToken.isEmpty
-                  ? CircularProgressIndicator()
-                  : Card(
-                      elevation: 8,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Image.network(getQrCode()),
-                      ),
+            ),
+            scanToken.isEmpty
+                ? CircularProgressIndicator()
+                : Card(
+                    elevation: 8,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.network(getQrCode()),
                     ),
-              Text(
-                "Token: $scanToken",
-                style: TextStyle(
-                  fontSize: 16,
-                ),
+                  ),
+            Text(
+              "Token: $scanToken",
+              style: TextStyle(
+                fontSize: 16,
               ),
-              Text(
-                "Son Güncelleme: ${formatTime(lastUpdatedAt)}",
-                style: TextStyle(
-                  fontSize: 16,
-                ),
+            ),
+            Text(
+              "Son Güncelleme: ${formatTime(lastUpdatedAt)}",
+              style: TextStyle(
+                fontSize: 16,
               ),
-              Clock(),
-            ],
-          ),
+            ),
+            Clock(),
+          ],
         ),
       ),
     );
@@ -97,8 +95,6 @@ class _AdminQrPageState extends State<AdminQrPage> {
   @override
   void initState() {
     super.initState();
-
-    logger.f("Websocket connecting... $socket");
 
     socket.emit("join", "admins");
 
