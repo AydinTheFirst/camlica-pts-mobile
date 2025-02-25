@@ -41,38 +41,27 @@ class _TaskFileUploaderState extends ConsumerState<TaskFileUploader> {
     setIsLoading(true);
 
     final data = _formKey.currentState!.value;
-    final files = (data["files"] as List<dynamic>).cast<XFile>();
+    if (data["files"] != null) {
+      final uploadedFiles = await HttpService.uploadFiles(data["files"]);
 
-    FormData formData = FormData();
+      if (uploadedFiles.isEmpty) {
+        setIsLoading(false);
+        return;
+      }
 
-    for (var file in files) {
-      String fileName = file.path.split('/').last;
-      formData.files.add(MapEntry(
-        'files',
-        await MultipartFile.fromFile(file.path, filename: fileName),
-      ));
-    }
-
-    try {
-      final filesRes = await HttpService.dio.post(
-        "/files",
-        data: formData,
-        options: Options(
-          headers: {'Content-Type': 'multipart/form-data'},
-        ),
-      );
-
-      await HttpService.dio.patch(
-        "/tasks/${widget.task.id}",
-        data: {
-          "files": filesRes.data,
-          "status": TaskStatus.DONE.name,
-        },
-      );
-      ToastService.success(message: "Göre başarıyla güncellendi!");
-      ref.invalidate(tasksProvider);
-    } on DioException catch (e) {
-      HttpService.handleError(e);
+      try {
+        await HttpService.dio.patch(
+          "/tasks/${widget.task.id}",
+          data: {
+            "files": [...widget.task.files, ...uploadedFiles],
+            "status": TaskStatus.DONE.name,
+          },
+        );
+        ToastService.success(message: "Görev başarıyla güncellendi!");
+        ref.invalidate(tasksProvider);
+      } on DioException catch (e) {
+        HttpService.handleError(e);
+      }
     }
 
     setIsLoading(false);

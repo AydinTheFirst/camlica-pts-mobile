@@ -113,6 +113,7 @@ class ProfileCard extends ConsumerWidget {
                     ),
                     title: Text("Yönetici"),
                     subtitle: Text("Bu kullanıcı yönetici"),
+                    onTap: () => Get.toNamed("/admin"),
                     trailing: IconButton(
                       onPressed: () async {
                         final confirmed = await showConfirmationDialog(context);
@@ -123,19 +124,6 @@ class ProfileCard extends ConsumerWidget {
                       icon: Icon(Icons.logout),
                       color: Colors.red,
                     ),
-                  )
-                : Container(),
-            isAdmin
-                ? ListTile(
-                    leading: Icon(
-                      Icons.qr_code,
-                      size: 40,
-                    ),
-                    title: Text("QR Kod"),
-                    subtitle: Text("Yönetici QR Kodu"),
-                    onTap: () {
-                      Get.toNamed("/admin-qr");
-                    },
                   )
                 : Container(),
             ListTile(

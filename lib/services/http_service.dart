@@ -1,7 +1,8 @@
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
+import 'package:form_builder_image_picker/form_builder_image_picker.dart';
+import 'package:get/get.dart' hide MultipartFile, FormData;
 import '/main.dart';
 import 'token_storage.dart';
 
@@ -45,9 +46,9 @@ class HttpService {
     );
 
   // Error handling için yardımcı metot
-  static void handleError(
-    DioException error,
-  ) {
+  static void handleError(DioException error) {
+    logger.e("HttpService.handleError: $error");
+
     if (error.response == null) {
       return ToastService.error(
         message: "Sunucuya bağlanırken bir hata oluştu.",
@@ -83,5 +84,36 @@ class HttpService {
 
   static getFile(String file) {
     return "$apiUrl/files/$file";
+  }
+
+  static Future<List<String>> uploadFiles(List<dynamic> files) async {
+    final List<XFile> xFiles = files.cast<XFile>();
+
+    if (files.isEmpty) return [];
+
+    FormData formData = FormData();
+
+    for (var file in xFiles) {
+      String fileName = file.path.split('/').last;
+      formData.files.add(MapEntry(
+        'files',
+        await MultipartFile.fromFile(file.path, filename: fileName),
+      ));
+    }
+
+    try {
+      final filesRes = await HttpService.dio.post(
+        "/files",
+        data: formData,
+        options: Options(
+          headers: {'Content-Type': 'multipart/form-data'},
+        ),
+      );
+      return List<String>.from(filesRes.data);
+    } on DioException catch (e) {
+      logger.e("Error: $e");
+      HttpService.handleError(e);
+      return [];
+    }
   }
 }

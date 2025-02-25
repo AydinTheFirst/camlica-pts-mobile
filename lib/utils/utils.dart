@@ -29,13 +29,13 @@ String formatDate(DateTime date) {
 String formatFullDate(DateTime date) {
   initializeDateFormatting('tr_TR', null);
   final gmtPlus3 = date.toUtc().add(Duration(hours: 3));
-  return DateFormat('dd.MM.yyyy HH:mm', 'tr_TR').format(gmtPlus3);
+  return DateFormat('dd.MM.yyyy HH:mm:ss', 'tr_TR').format(gmtPlus3);
 }
 
 String formatTime(DateTime date) {
   initializeDateFormatting('tr_TR', null);
   final gmtPlus3 = date.toUtc().add(Duration(hours: 3));
-  return DateFormat('HH:mm', 'tr_TR').format(gmtPlus3);
+  return DateFormat('HH:mm:ss', 'tr_TR').format(gmtPlus3);
 }
 
 String uuid() {

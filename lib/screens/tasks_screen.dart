@@ -9,7 +9,7 @@ class TasksScreen extends ConsumerWidget {
   const TasksScreen({super.key});
 
   void onPressed() {
-    Get.toNamed("/tasks/add");
+    Get.toNamed("/admin/task-add");
   }
 
   @override

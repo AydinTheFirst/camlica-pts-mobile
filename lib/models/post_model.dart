@@ -9,6 +9,8 @@ class Post {
   final String body;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DateTime? validUntil;
+  final bool isSeen;
 
   Post({
     required this.id,
@@ -16,6 +18,8 @@ class Post {
     required this.body,
     required this.createdAt,
     required this.updatedAt,
+    required this.isSeen,
+    this.validUntil,
   });
 
   factory Post.fromJson(Map<String, dynamic> json) => _$PostFromJson(json);

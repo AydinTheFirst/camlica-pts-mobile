@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:camlica_pts/models/post_model.dart';
 import 'package:camlica_pts/providers.dart';
+import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/utils/utils.dart';
 
 import 'package:flutter/material.dart';
@@ -27,7 +28,10 @@ class HomeScreen extends StatelessWidget {
 class Posts extends ConsumerWidget {
   const Posts({super.key});
 
-  void showPost(Post post) {
+  void showPost(Post post, WidgetRef ref) async {
+    await HttpService.dio.patch("/posts/${post.id}", data: {"isSeen": true});
+    ref.invalidate(postsProvider);
+
     // show dialog
     Get.dialog(
       AlertDialog(
@@ -55,6 +59,8 @@ class Posts extends ConsumerWidget {
         child: CircularProgressIndicator(),
       ),
       data: (posts) {
+        posts.sort((a, b) => a.isSeen ? 1 : -1);
+
         return RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(postsProvider);
@@ -66,13 +72,16 @@ class Posts extends ConsumerWidget {
             itemBuilder: (context, index) {
               final post = posts[index];
               return ListTile(
-                leading: Icon(Icons.message),
+                leading: Icon(
+                  Icons.message,
+                  color: post.isSeen ? Colors.black : Colors.blue,
+                ),
                 title: Text(post.title),
                 subtitle: Column(
                   spacing: 4,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(posts[index].body),
+                    Text(post.body),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -81,7 +90,7 @@ class Posts extends ConsumerWidget {
                     ),
                   ],
                 ),
-                onTap: () => showPost(posts[index]),
+                onTap: () => showPost(post, ref),
               );
             },
           ),

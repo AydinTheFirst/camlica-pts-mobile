@@ -11,10 +11,11 @@ import 'package:camlica_pts/providers.dart';
 import 'package:camlica_pts/services/http_service.dart';
 import 'package:camlica_pts/services/toast_service.dart';
 import 'package:camlica_pts/utils/utils.dart';
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:form_builder_image_picker/form_builder_image_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:get/get.dart';
 
@@ -64,10 +65,6 @@ class TaskAddForm extends ConsumerWidget {
       );
     }
 
-    logger.d("TaskAddForm: $config");
-    logger.d("TaskAddForm: $users");
-    logger.d("TaskAddForm: $units");
-
     return TaskAddFormBody(
       users: users,
       units: units,
@@ -104,7 +101,9 @@ class _TaskAddFormBodyState extends ConsumerState<TaskAddFormBody> {
       return;
     }
 
-    final data = _formKey.currentState!.value;
+    final data = Map<String, dynamic>.from(
+      _formKey.currentState!.value,
+    );
 
     logger.d("TaskAddFormBody: $data");
 
@@ -113,21 +112,40 @@ class _TaskAddFormBodyState extends ConsumerState<TaskAddFormBody> {
     );
 
     try {
-      await HttpService.dio.post("/tasks", data: {
+      final files = data["files"];
+      data.remove("files");
+
+      final res = await HttpService.dio.post("/tasks", data: {
         ...data,
         "selectedMap": jsonEncode(selectedMap),
         "locationX": locationX.value,
         "locationY": locationY.value,
       });
-      logger.i("Task added");
+
       ToastService.success(message: "Görev eklendi");
+
+      if (files != null) {
+        ToastService.info(message: "Dosyalar yükleniyor...");
+        final uploadedFiles = await HttpService.uploadFiles(files);
+
+        if (uploadedFiles.isEmpty) {
+          return;
+        }
+
+        await HttpService.dio.patch(
+          "/tasks/${res.data!["id"]}",
+          data: {
+            "files": uploadedFiles,
+          },
+        );
+
+        ToastService.success(message: "Dosyalar yüklendi");
+      }
+
       ref.invalidate(tasksProvider);
       Get.toNamed("/tasks");
-    } on DioException catch (e) {
+    } on dio.DioException catch (e) {
       HttpService.handleError(e);
-    } catch (e) {
-      logger.e("Error adding task: $e");
-      ToastService.error(message: "Görev eklenirken bir hata oluştu");
     }
   }
 
@@ -146,6 +164,7 @@ class _TaskAddFormBodyState extends ConsumerState<TaskAddFormBody> {
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               FormBuilderDropdown(
+                initialValue: widget.units.first.id,
                 name: "unitId",
                 decoration: InputDecoration(
                   labelText: "Birim",
@@ -199,8 +218,14 @@ class _TaskAddFormBodyState extends ConsumerState<TaskAddFormBody> {
                   );
                 }).toList(),
               ),
+              FormBuilderImagePicker(
+                name: "files",
+                decoration: InputDecoration(
+                  labelText: "Dosya",
+                  border: OutlineInputBorder(),
+                ),
+              ),
               FormBuilderDropdown(
-                initialValue: selectedMap.value,
                 name: "selectedMap",
                 decoration: InputDecoration(
                   labelText: "Harita",
