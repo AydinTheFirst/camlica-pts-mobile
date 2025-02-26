@@ -1,80 +1,64 @@
 import 'package:camlica_pts/components/badges.dart';
 import 'package:camlica_pts/screens/notifications_page.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'screens/qr_screen.dart';
 import 'screens/tasks_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/profile_screen.dart';
 
-class BottomNavigation extends StatefulWidget {
-  final String currentKey;
-
-  const BottomNavigation({super.key, required this.currentKey});
-
-  @override
-  BottomNavigationState createState() => BottomNavigationState();
-}
-
-class BottomNavigationState extends State<BottomNavigation> {
-  String _currentKey = 'home';
+class BottomNavigation extends StatelessWidget {
+  BottomNavigation({super.key});
 
   final _pages = [
     {
       "label": "Duyurular",
-      "key": "home",
+      "key": "/",
       "page": HomeScreen(),
       "icon": PostsBadge()
     },
     {
       "label": "Bildirimler",
-      "key": "notifications",
+      "key": "/notifications",
       "page": NotificationsPage(),
       "icon": NotificationsBadge()
     },
     {
       "label": "Görevler",
-      "key": "tasks",
+      "key": "/tasks",
       "page": TasksScreen(),
       "icon": TasksBadge()
     },
     {
       "label": "Qr Kod",
-      "key": "qr",
+      "key": "/qr",
       "page": QrScreen(),
       "icon": Icon(Icons.qr_code)
     },
     {
       "label": "Profil",
-      "key": "profile",
+      "key": "/profile",
       "page": ProfileScreen(),
       "icon": Icon(Icons.person)
     }
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _currentKey = widget.currentKey;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    int currentIndex =
-        _pages.indexWhere((element) => element['key'] == _currentKey);
+    String currentRoute = Get.currentRoute;
 
-    void handleTap(int index) {
-      setState(() {
-        _currentKey = _pages[index]['key'] as String;
-      });
-    }
+    int currentIndex = _pages.indexWhere((page) => page['key'] == currentRoute);
 
     return Scaffold(
       body: _pages[currentIndex]['page'] as Widget,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         type: BottomNavigationBarType.fixed,
-        onTap: handleTap,
+        onTap: (index) {
+          String selectedRoute = _pages[index]['key'] as String;
+          Get.offAllNamed(selectedRoute); // Sayfayı değiştir, geçmişi temizle
+        },
         items: _pages
             .map(
               (page) => BottomNavigationBarItem(

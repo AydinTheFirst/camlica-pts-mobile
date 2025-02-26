@@ -18,6 +18,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       birthDate: json['birthDate'] == null
           ? null
           : DateTime.parse(json['birthDate'] as String),
+      firebaseToken: json['firebaseToken'] as String?,
       roles: (json['roles'] as List<dynamic>)
           .map((e) => $enumDecode(_$UserRoleEnumMap, e))
           .toList(),
@@ -34,6 +35,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'unitId': instance.unitId,
       'birthDate': instance.birthDate?.toIso8601String(),
       'roles': instance.roles.map((e) => _$UserRoleEnumMap[e]!).toList(),
+      'firebaseToken': instance.firebaseToken,
     };
 
 const _$UserRoleEnumMap = {

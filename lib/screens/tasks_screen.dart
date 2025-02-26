@@ -103,38 +103,14 @@ class TaskList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasksAsync = ref.watch(tasksProvider);
-    final profileAsync = ref.watch(profileProvider);
 
     final tasks = tasksAsync.maybeWhen(
       orElse: () => [],
       data: (data) => data,
     );
 
-    final profile = profileAsync.maybeWhen(
-      orElse: () => null,
-      data: (data) => data,
-    );
-
     // Filtreleme işlemi
-    final filteredTasks = tasks.where((task) {
-      switch (state) {
-        case TaskStatus.PENDING:
-          return task.status == TaskStatus.PENDING &&
-              task.unitId == profile?.unitId;
-        case TaskStatus.IN_PROGRESS:
-          return task.status == TaskStatus.IN_PROGRESS &&
-              task.assignedToId == profile?.id;
-        case TaskStatus.DONE:
-          return task.status == TaskStatus.DONE &&
-              task.assignedToId == profile?.id;
-        case TaskStatus.APPROVED:
-          return task.status == TaskStatus.APPROVED &&
-              task.assignedToId == profile?.id;
-        case TaskStatus.REJECTED:
-          return task.status == TaskStatus.REJECTED &&
-              task.unitId == profile?.unitId;
-      }
-    }).toList();
+    final filteredTasks = tasks.where((task) => task.status == state).toList();
 
     if (filteredTasks.isEmpty) {
       return const Center(child: Text("Filtrelere uygun görev bulunamadı"));

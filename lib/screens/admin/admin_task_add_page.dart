@@ -29,6 +29,12 @@ class TaskAddScreen extends StatelessWidget {
         title: const Text('Görev Ekle'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Get.toNamed("/admin");
+          },
+        ),
       ),
       body: TaskAddForm(),
     );

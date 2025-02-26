@@ -15,6 +15,7 @@ class User {
   final String? unitId;
   final DateTime? birthDate;
   final List<UserRole> roles;
+  final String? firebaseToken;
 
   User({
     required this.id,
@@ -26,6 +27,7 @@ class User {
     required this.firstName,
     required this.lastName,
     this.birthDate,
+    this.firebaseToken,
     required this.roles,
   });
 

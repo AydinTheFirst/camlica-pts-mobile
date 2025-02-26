@@ -21,6 +21,12 @@ class AdminPostAddPage extends StatelessWidget {
         title: const Text('Duyuru Ekle'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Get.toNamed("/admin");
+          },
+        ),
       ),
       body: FormBody(),
     );
@@ -37,19 +43,21 @@ class FormBody extends ConsumerWidget {
       return;
     }
 
-    final formData = _formKey.currentState?.value;
+    final formData = Map.from(_formKey.currentState!.value);
 
-    if (formData == null) {
-      ToastService.error(message: "Form verileri alınamadı");
-      return;
+    if (formData["validUntil"] != null) {
+      formData["validUntil"] =
+          "${(formData["validUntil"] as DateTime).toIso8601String()}Z";
+    }
+
+    if (formData["relatedUnits"] == null) {
+      formData["relatedUnits"] = [];
     }
 
     logger.d(formData);
 
     try {
-      await HttpService.dio.post("/posts", data: {
-        ...formData,
-      });
+      await HttpService.dio.post("/posts", data: formData);
       ToastService.success(message: "Duyuru gönderildi");
       Future.delayed(Duration(seconds: 1), () {
         Get.toNamed("/admin");
@@ -113,9 +121,6 @@ class FormBody extends ConsumerWidget {
                     decoration: InputDecoration(
                       labelText: "İlgili Birimler",
                     ),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                    ]),
                     options: units
                         .map((unit) => FormBuilderFieldOption(
                               value: unit.id,

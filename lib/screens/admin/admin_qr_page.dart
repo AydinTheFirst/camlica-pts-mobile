@@ -5,6 +5,7 @@ import 'package:camlica_pts/main.dart';
 import 'package:camlica_pts/socket.dart';
 import 'package:camlica_pts/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 /* final scanTokenProvider = AutoDisposeFutureProvider((ref) async {
   final response = await HttpService.fetcher("/qrcode/token");
@@ -51,6 +52,12 @@ class _AdminQrPageState extends State<AdminQrPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("QR"),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Get.toNamed("/admin");
+          },
+        ),
       ),
       body: Center(
         child: Column(

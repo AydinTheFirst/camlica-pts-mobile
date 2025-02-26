@@ -81,6 +81,14 @@ class ProfileCard extends ConsumerWidget {
     }
   }
 
+  void testNotifications() async {
+    try {
+      await HttpService.dio.post("/notifications/test");
+    } on DioException catch (e) {
+      HttpService.handleError(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(profileProvider);
@@ -94,7 +102,6 @@ class ProfileCard extends ConsumerWidget {
             ListTile(
               leading: Icon(
                 Icons.person,
-                size: 40,
               ),
               title: Text("${user.firstName} ${user.lastName}"),
               subtitle: Text(user.phone ?? 'Telefon numarası yok'),
@@ -109,7 +116,6 @@ class ProfileCard extends ConsumerWidget {
                 ? ListTile(
                     leading: Icon(
                       Icons.admin_panel_settings,
-                      size: 40,
                     ),
                     title: Text("Yönetici"),
                     subtitle: Text("Bu kullanıcı yönetici"),
@@ -127,9 +133,18 @@ class ProfileCard extends ConsumerWidget {
                   )
                 : Container(),
             ListTile(
+              leading: Icon(Icons.notifications),
+              title: user.firebaseToken == null
+                  ? Text(
+                      "Lütfen uygulamayı yeniden başlatın",
+                      style: TextStyle(color: Colors.red),
+                    )
+                  : Text("Bildirimleri test et  "),
+              onTap: testNotifications,
+            ),
+            ListTile(
               leading: Icon(Icons.support_agent),
               title: Text("Destek"),
-              trailing: Icon(Icons.open_in_browser),
               onTap: () => openWhatsapp(user),
             ),
           ],
@@ -174,23 +189,10 @@ class _LinksState extends State<Links> {
     }
   }
 
-  void testNotifications() async {
-    try {
-      await HttpService.dio.post("/notifications/test");
-    } on DioException catch (e) {
-      HttpService.handleError(e);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ListTile(
-          leading: Icon(Icons.notifications),
-          title: Text("Bildirimleri Test Et"),
-          onTap: testNotifications,
-        ),
         ListTile(
           leading: Icon(Icons.privacy_tip),
           title: Text("Gizlilik Politikası"),

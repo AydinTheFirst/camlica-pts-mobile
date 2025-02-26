@@ -16,7 +16,7 @@ final profileProvider = AutoDisposeFutureProvider<User>((ref) async {
 final postsProvider = AutoDisposeFutureProvider<List<Post>>((ref) async {
   final data = await HttpService.fetcher("/posts");
   final posts = List<Post>.from(data.map((x) => Post.fromJson(x)));
-  posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  posts.sort((a, b) => a.createdAt.compareTo(b.createdAt));
   return posts;
 });
 
@@ -45,7 +45,7 @@ final notificationsProvider =
   final data = await HttpService.fetcher("/notifications");
   final notifications = List<NotificationModel>.from(
       data.map((x) => NotificationModel.fromJson(x)));
-  notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  notifications.sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
   return notifications;
 });
